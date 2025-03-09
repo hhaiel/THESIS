@@ -74,7 +74,33 @@ TIKTOK_LEXICON = {
     'cursed': -0.6, 'clout chasing': -0.7, 'fake': -0.7, 'fraud': -0.8, 'scam': -0.8,
     'disappointing': -0.7, 'trash': -0.8, 'nightmare': -0.7, 'unfollow': -0.6, 'worst': -0.8,
     'shadowban': -0.7, 'shadow ban': -0.7, 'triggered': -0.5, 'cancelled': -0.7,
-    'flopped': -0.8, 'overrated': -0.6, 'boring': -0.6, 'annoying': -0.7, 'wtf': -0.6
+    'flopped': -0.8, 'overrated': -0.6, 'boring': -0.6, 'annoying': -0.7, 'wtf': -0.6,
+    
+    
+    # Negative product-specific terms
+    'defective': -0.8, 'sira': -0.8, 'broken': -0.8, 'not working': -0.8, 
+    'budol': -0.9, 'peke': -0.8, 'counterfeit': -0.8, 'knockoff': -0.8,
+    'overpriced': -0.7, 'mahal': -0.6, 'sobrang mahal': -0.8, 'not worth it': -0.7, 
+    'hindi sulit': -0.7, 'sayang': -0.7, 'waste': -0.8, 'regret': -0.8,
+    'misleading': -0.7, 'false advertising': -0.8, 'refund': -0.5, 'return': -0.5,
+    'terrible': -0.8, 'avoid': -0.7, 'stay away': -0.8, 'pangit': -0.7,
+    'marupok': -0.7, 'madaling masira': -0.8, 'walang kwenta': -0.8, 'useless': -0.8,
+    'expired': -0.8, 'expiry': -0.7, 'arrived damaged': -0.8, 'doa': -0.8,
+    'not as described': -0.7, 'hindi kapareho': -0.7, 'catfishing': -0.8,
+    
+    # Shopping platform specific terms
+    'shopee scam': -0.9, 'lazada scam': -0.9, 'tiktok shop scam': -0.9,
+    'shopee budol': -0.8, 'lazada budol': -0.8, 'tiktok shop budol': -0.8,
+    'cod scam': -0.9, 'cash on delivery scam': -0.9,
+    'seller ghosted': -0.8, 'hindi nagrereply': -0.7, 'no response': -0.7,
+    'cancellation': -0.6, 'cancelled order': -0.6, 'delayed shipping': -0.6,
+    
+    # Positive product-specific terms
+    'sulit': 0.7, 'worth it': 0.7, 'quality': 0.7, 'excellent': 0.8, 'legit': 0.8,
+    'authentic': 0.7, 'original': 0.7, 'recommended': 0.7, 'mura': 0.6, 'affordable': 0.6,
+    'fast delivery': 0.7, 'mabilis dumating': 0.7, 'responsive seller': 0.7,
+    'generous seller': 0.7, 'exceeded expectations': 0.8, 'free gift': 0.6,
+    'good packaging': 0.6, 'secure packaging': 0.6, 'well packed': 0.6
 }
 FILIPINO_LEXICON = {
     # Positive Filipino/Taglish words
@@ -117,6 +143,8 @@ FILIPINO_LEXICON = {
     'talaga naman': -0.5, 'asa pa': -0.6, 'good luck': -0.5, 'lmao': -0.6,
     'tatawa': -0.4, 'natawa': -0.5, 'patawa': -0.5, 'aliw': -0.4,
     'naaliw': -0.5, 'pinapatawa': -0.5, 'katatawa': -0.5
+
+    
 }
 
 TROLL_PATTERNS = [
@@ -154,6 +182,60 @@ TROLL_PATTERNS = [
     r'(kabobohan|katangahan|kaululan)',  # Name-calling
     r'\b(ok|sige|sure)\s*na\s*yan\s*for\s*you',  # Dismissive agreement
     r'#(tiktokfamous|viralvideo|foryoupage|fyp)',  # Hashtag baiting
+        # Product-specific troll patterns
+    r'(fake|peke|scam|budol|lokohan|manloloko)\s*(product|item|seller)',  # Fake product accusations
+    r'(over|sobrang)\s*(priced|mahal)',  # Overpriced complaints
+    r'(don\'t|wag|huwag)\s*(buy|order|bilhin)',  # Discouraging purchases
+    r'(waste|sayang)\s*(of|ng)\s*(money|pera)',  # Money waste claims
+    r'(worst|pinakamasamang)\s*(purchase|bili|product)',  # Extreme negative claims
+    r'(returns?|refunds?)\s*(denied|rejected|hindi)',  # Return/refund complaints
+    r'(buyer|customer)\s*(beware|ingat)',  # Warning other customers
+    r'(marketing|ad|advertisement)\s*(scam|lie|kasinungalingan)',  # Marketing dishonesty claims
+    r'(not|hindi)\s*(worth|sulit)',  # Value complaints
+    r'(broken|sira|defective)\s*(on|upon|pagka)\s*(arrival|dating|deliver)',  # DOA claims
+    
+    # Exaggerated reviews
+    r'(never|hindi\s*na\s*ulit)\s*(buying|bibili)',  # Never buying again
+    r'(regret|nagsisisi)\s*(buying|purchase)',  # Purchase regret
+    r'(0|zero)\s*(stars|rating)',  # Zero rating claims
+    r'(this|ito)\s*(ain\'t|hindi)\s*(it|maganda|okay)',  # Dismissive language
+    
+    # Suspicious behavior patterns
+    r'(all|lahat\s*ng)\s*(reviews|ratings|comments)\s*(fake|peke|paid|bayad)',  # Fake review accusations
+    r'(shop|store)\s*(paying|nagbabayad)\s*for\s*(good|positive|5\s*star)',  # Paid review accusations
+    r'(daming|andaming|ang\s*dami\s*ng)\s*(tanga|bobo|uto-uto)',  # Insulting other customers
+    r'(obvious|halatang)\s*(paid|bayad)',  # Calling out paid endorsements
+    
+    # Specific product claim patterns
+    r'(expired|expiry|lumang)\s*(product|item)',  # Expired products
+    r'(fake|peke|counterfeit|pirated|class\s*[a-z])',  # Counterfeit accusations
+    r'(factory|manufacturer)\s*(defect|reject)',  # Factory defects
+    r'(not|hindi)\s*(authentic|original|tunay)',  # Authenticity questions
+    r'(expectations)\s*vs\s*(reality)',  # Expectation vs reality
+    r'(order|expectation)\s*vs\s*(received|reality)',  # Order vs received
+    
+    # Mocking patterns
+    r'(laughing|tumawa|natawa)\s*so\s*(hard|much)',  # Mocking reactions
+    r'(clown|circus|joke)\s*(emoji|face)?',  # Calling product/seller a joke
+    r'(imagine|isipin)\s*(paying|nagbayad)',  # Mocking buyers
+    
+    # Extreme comparison claims
+    r'(better|mas\s*maganda)\s*(off|pa)\s*(buying|bumili)',  # Better off elsewhere claims
+    r'(local|china|chinese)\s*(products|alternatives)\s*(better|mas\s*maganda)',  # Comparison to alternatives
+    r'(could|pwede)\s*(have|sana)\s*(bought|bumili)',  # Regret comparisons
+    
+    # General catastrophizing
+    r'(worst|pinaka\s*malala|pinakamasamang)\s*(product|experience)',  # Extreme negative statements
+    r'(completely|totally|absolutely)\s*(useless|worthless|walang\s*kwenta)',  # Extreme uselessness claims
+    r'(biggest|pinakamalaking)\s*(mistake|regret)',  # Extreme regret claims
+    
+    # Filipino-specific patterns
+    r'(budol|na-budol|nabudol)',  # Scammed
+    r'(sayang|nasayang)\s*(pera|money|funds)',  # Wasted money
+    r'(lubog|nilubog|nilubog)\s*(pera|money)',  # Sunken cost
+    r'(pinagkakitaan|kita|kumikita)\s*(lang)',  # Just for profit
+    r'(puro|pure)\s*(kalokohan|pangako|promises)',  # Empty promises
+    r'(panloloko|manloloko|pangloloko)',  # Deception terms
 ]
 def validate_regex_patterns(patterns):
     """

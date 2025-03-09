@@ -1077,7 +1077,8 @@ elif page == "Fetch TikTok Comments":
                             "Positive Comments": len(comments_df[comments_df['Enhanced Sentiment'].str.contains('Positive')]),
                             "Negative Comments": len(comments_df[comments_df['Enhanced Sentiment'].str.contains('Negative')]),
                             "Neutral Comments": len(comments_df[comments_df['Enhanced Sentiment'].str.contains('Neutral')]),
-                            "Tagalog Comments": len(comments_df[comments_df['Comment'].apply(is_tagalog)])
+                            "Tagalog Comments": len(comments_df[comments_df['Comment'].apply(is_tagalog)]),
+                            "Troll Comments": len(comments_df[comments_df['Is Troll'] == True])
                         }
                         
                         # Display stats in columns
