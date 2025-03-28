@@ -1,0 +1,16 @@
+streamlit
+pandas
+numpy
+matplotlib
+seaborn
+nltk
+scikit-learn
+scipy
+emoji
+apify-client
+python-dotenv
+wordcloud
+plotly
+chardet
+langdetect
+joblib
