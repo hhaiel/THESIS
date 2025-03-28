@@ -473,7 +473,7 @@ def plot_sentiment_distribution(df, sentiment_column):
     
     # Create plot
     fig, ax = plt.subplots(figsize=(10, 5))
-    colors = {'Positive': 'green', 'Negative': 'red', 'Neutral': 'gray'}
+    colors = {'Positive': 'green', 'Negative': 'red', 'Neutral': 'gray', 'Troll': 'purple'}
     
     sns.barplot(x=counts.index, y=counts.values, palette=[colors.get(cat, 'blue') for cat in counts.index], ax=ax)
     ax.set_title('Sentiment Distribution')
@@ -485,6 +485,11 @@ def plot_sentiment_distribution(df, sentiment_column):
     for i, count in enumerate(counts):
         percentage = 100 * count / total
         ax.text(i, count + 5, f'{percentage:.1f}%', ha='center')
+    
+    # Add legend
+    legend_elements = [plt.Rectangle((0,0),1,1, facecolor=color, label=cat) 
+                      for cat, color in colors.items() if cat in counts.index]
+    ax.legend(handles=legend_elements)
     
     return fig
 
@@ -501,9 +506,9 @@ def create_sentiment_heatmap(df):
     for col in required_columns:
         sentiment_matrix[col] = df[col].apply(lambda x: x.split(' ')[0])
     
-    # Calculate agreement matrix
-    agreement_matrix = pd.DataFrame(index=['Positive', 'Neutral', 'Negative'], 
-                                  columns=['Positive', 'Neutral', 'Negative'])
+    # Calculate agreement matrix - now including Troll category
+    agreement_matrix = pd.DataFrame(index=['Positive', 'Neutral', 'Negative', 'Troll'], 
+                                  columns=['Positive', 'Neutral', 'Negative', 'Troll'])
     
     # Fill the matrix with zeros
     agreement_matrix = agreement_matrix.fillna(0)
@@ -701,14 +706,13 @@ elif page == "Upload Data":
                     # Apply combined sentiment analysis
                     comments_df['Combined Sentiment'] = combined_sentiment_analysis(comments_df['Demojized'])
                     
-                    # Apply enhanced sentiment analysis with language preference
+                    # Apply enhanced sentiment analysis with language preference and troll detection
                     troll_results = comments_df['Comment'].apply(
                         lambda text: analyze_comment_with_trolling(text, language_mode)
                     )
                     comments_df['Enhanced Sentiment'] = troll_results.apply(lambda x: x['sentiment_text'])
                     comments_df['Is Troll'] = troll_results.apply(lambda x: x['is_troll'])
-                    comments_df['Troll Score'] = troll_results.apply(lambda x: x['troll_score']
-                    )
+                    comments_df['Troll Score'] = troll_results.apply(lambda x: x['troll_score'])
                     
                 
                 # Create tabs for different views
@@ -743,7 +747,7 @@ elif page == "Upload Data":
 
                     # Let user choose new sentiment
                     corrected_sentiment = st.radio("Correct sentiment:", 
-                                                  options=["Positive", "Neutral", "Negative"])
+                                                  options=["Positive", "Neutral", "Negative", "Troll"])
 
                     if st.button("Save Correction"):
                         # Save the corrected sentiment with a confidence of 1.0 (manual label)
@@ -783,18 +787,6 @@ elif page == "Upload Data":
                         st.subheader("Sentiment Distribution")
                         # Plot sentiment distribution
                         fig = plot_sentiment_distribution(comments_df, 'Enhanced Sentiment')
-                        st.subheader("Troll Comment Distribution")
-                        troll_counts = comments_df['Is Troll'].value_counts()
-                        fig, ax = plt.subplots(figsize=(10, 5))
-                        colors = ['red', 'green']
-                        sns.barplot(x=['Troll', 'Not Troll'], y=[troll_counts.get(True, 0), troll_counts.get(False, 0)], palette=colors, ax=ax)
-                        ax.set_title('Troll vs. Normal Comments')
-                        ax.set_ylabel('Count')
-                        total = len(comments_df)
-                        troll_pct = 100 * troll_counts.get(True, 0) / total
-                        normal_pct = 100 * troll_counts.get(False, 0) / total
-                        ax.text(0, troll_counts.get(True, 0) + 5, f'{troll_pct:.1f}%', ha='center')
-                        ax.text(1, troll_counts.get(False, 0) + 5, f'{normal_pct:.1f}%', ha='center')
                         st.pyplot(fig)
                     
                     with col2:
@@ -852,9 +844,6 @@ elif page == "Upload Data":
                     st.subheader("Comment Statistics")
                     
                     # Basic stats
-
-                    
-                    # Basic stats
                     stats = {
                         "Total Comments": len(comments_df),
                         "Average Comment Length": int(comments_df['Comment'].apply(len).mean()),
@@ -893,75 +882,7 @@ elif page == "Upload Data":
                         st.pyplot(fig)
                     else:
                         st.info("No hashtags found in the comments.")
-                with tab5:
-                        st.header("Market Trend Analysis")
-    
-                        # Get baseline purchase volume
-                        col1, col2 = st.columns(2)
-                        baseline_volume = col1.number_input(
-                        "Baseline monthly sales volume:", 
-                            min_value=100, 
-                            value=1000,
-                            key="fetch_tab5_baseline_volume"  # Add this unique key
-                        )
-                        product_name = col2.text_input(
-                            "Product name:", 
-                            value="TikTok Product",
-                            key="fetch_tab5_product_name"  # Add this unique key
-                        )
-                        # Calculate purchase intent for each comment
-                        with st.spinner("Calculating purchase intent..."):
-                            comments_df['purchase_intent'] = detect_purchase_intent(comments_df['Comment'])
-    
-                        # Calculate market trend scores
-                        with st.spinner("Calculating market trends..."):
-                            trend_summary, enhanced_df = calculate_market_trend_score(comments_df)
-                            prediction = predict_purchase_volume(trend_summary, baseline_volume)
-    
-                        # Display key metrics
-                        st.subheader("Market Trend Overview")
-                        col1, col2, col3, col4 = st.columns(4)
-                        col1.metric("Market Trend Score", f"{trend_summary['overall_score']:.1f}/100", 
-                        trend_summary['trend_category'])
-                        col2.metric("Positive Sentiment", f"{trend_summary['positive_sentiment_ratio']*100:.1f}%")
-                        col3.metric("Purchase Intent", f"{trend_summary['purchase_intent_ratio']*100:.1f}%")
-                        col4.metric("Viral Potential", f"{trend_summary.get('viral_potential', 0):.1f}%")
-    
-                        # Plot market prediction visualization
-                        st.subheader("Market Trend Visualization")
-                        market_fig = plot_market_prediction(enhanced_df, trend_summary)
-                        st.pyplot(market_fig)
-    
-                        # Display sales prediction
-                        st.subheader("Sales Prediction")
-                        st.write(f"Predicted Sales Volume: {prediction['predicted_volume']:.0f} units")
-                        st.write(f"Prediction Range: {prediction['min_prediction']:.0f} to {prediction['max_prediction']:.0f} units")
-    
-                        # Show full report
-                        with st.expander("View Full Market Trend Report"):
-                            report = generate_market_trend_report(enhanced_df, product_name, prediction)
-                            st.markdown(report)
-        
-                        # Allow download of the report
-                        report_bytes = report.encode()
-                        st.download_button(
-                            label="Download Market Report",
-                            data=report_bytes,
-                            file_name=f"{product_name.replace(' ', '_')}_market_report.md",
-                            mime="text/markdown",
-                        )
-    
-                                # Additional market visualizations
-                        st.subheader("Purchase Intent Distribution")
-                        intent_fig = px.histogram(enhanced_df, 
-                                                x='purchase_intent', 
-                                                nbins=20, 
-                                                title="Distribution of Purchase Intent",
-                                                color_discrete_sequence=['#0074D9'])
-                        intent_fig.update_layout(xaxis_title="Purchase Intent Score", 
-                                                yaxis_title="Number of Comments")
-                        st.plotly_chart(intent_fig, use_container_width=True)
-                     
+
 # TikTok Comment Fetching
 elif page == "Fetch TikTok Comments":
     st.header("Fetch TikTok Comments")
@@ -1005,22 +926,21 @@ elif page == "Fetch TikTok Comments":
                             # Apply combined sentiment analysis
                             comments_df['Combined Sentiment'] = combined_sentiment_analysis(comments_df['Demojized'])
                             
+                            # Apply enhanced sentiment analysis with language preference and troll detection
                             troll_results = comments_df['Comment'].apply(
                                 lambda text: analyze_comment_with_trolling(text, language_mode)
                             )
                             comments_df['Enhanced Sentiment'] = troll_results.apply(lambda x: x['sentiment_text'])
                             comments_df['Is Troll'] = troll_results.apply(lambda x: x['is_troll'])
-                            comments_df['Troll Score'] = troll_results.apply(lambda x: x['troll_score']
-                                                 )
+                            comments_df['Troll Score'] = troll_results.apply(lambda x: x['troll_score'])
                     
                     # Create tabs for different views
-                    tab1, tab2, tab3, tab4, tab5 = st.tabs(["Data View", "Visualizations", "Sentiment Analysis", "Statistics", "Market Trends"])
-
+                    tab1, tab2, tab3, tab4 = st.tabs(["Data View", "Visualizations", "Sentiment Analysis", "Statistics"])
                     
                     with tab1:
                         # Display data
                         st.subheader("Processed Comments")
-                        st.dataframe(comments_df[['Comment', 'Processed Comment', 'VADER Sentiment', 'MNB Sentiment', 'Enhanced Sentiment', 'Is Troll', 'Troll Score']])
+                        st.dataframe(comments_df[['Comment', 'Processed Comment', 'VADER Sentiment', 'MNB Sentiment', 'Enhanced Sentiment']])
                         
                         # Allow download of processed data
                         csv = comments_df.to_csv(index=False)
@@ -1046,7 +966,7 @@ elif page == "Fetch TikTok Comments":
 
                         # Let user choose new sentiment
                         corrected_sentiment = st.radio("Correct sentiment:", 
-                                                      options=["Positive", "Neutral", "Negative"])
+                                                      options=["Positive", "Neutral", "Negative", "Troll"])
 
                         if st.button("Save Correction"):
                             # Save the corrected sentiment with a confidence of 1.0 (manual label)
@@ -1154,20 +1074,20 @@ elif page == "Fetch TikTok Comments":
                             "Positive Comments": len(comments_df[comments_df['Enhanced Sentiment'].str.contains('Positive')]),
                             "Negative Comments": len(comments_df[comments_df['Enhanced Sentiment'].str.contains('Negative')]),
                             "Neutral Comments": len(comments_df[comments_df['Enhanced Sentiment'].str.contains('Neutral')]),
-                            "Tagalog Comments": len(comments_df[comments_df['Comment'].apply(is_tagalog)]),
-                            "Troll Comments": len(comments_df[comments_df['Is Troll'] == True])
+                            "Troll Comments": len(comments_df[comments_df['Enhanced Sentiment'].str.contains('Troll')]),
+                            "Tagalog Comments": len(comments_df[comments_df['Comment'].apply(is_tagalog)])
                         }
                         
                         # Display stats in columns
-                        col1, col2, col3 = st.columns(3)
+                        col1, col2, col3, col4 = st.columns(4)
                         col1.metric("Total Comments", stats["Total Comments"])
                         col1.metric("Average Length", stats["Average Comment Length"])
                         col2.metric("Positive Comments", stats["Positive Comments"])
                         col2.metric("Negative Comments", stats["Negative Comments"])
                         col3.metric("Neutral Comments", stats["Neutral Comments"])
-                        col3.metric("Comments with Emojis", stats["Comments with Emojis"])
-                        col1.metric("Tagalog Comments", stats["Tagalog Comments"])
                         col3.metric("Troll Comments", stats["Troll Comments"])
+                        col4.metric("Comments with Emojis", stats["Comments with Emojis"])
+                        col4.metric("Tagalog Comments", stats["Tagalog Comments"])
                         
                         # Hashtag analysis
                         st.subheader("Hashtag Analysis")
@@ -1186,68 +1106,6 @@ elif page == "Fetch TikTok Comments":
                     
                         else:
                             st.info("No hashtags found in the comments.")
-                    with tab5:
-                        st.header("Market Trend Analysis")
-    
-                        # Get baseline purchase volume
-                        col1, col2 = st.columns(2)
-                        baseline_volume = col1.number_input("Baseline monthly sales volume:", min_value=100, value=1000, key="fetch_tab5_baseline_volume")
-                        product_name = col2.text_input("Product name:", value="TikTok Product", key="fetch_tab5_product_name")
-    
-                        # Calculate purchase intent for each comment
-                        with st.spinner("Calculating purchase intent..."):
-                            comments_df['purchase_intent'] = detect_purchase_intent(comments_df['Comment'])
-    
-    # Calculate market trend scores
-                        with st.spinner("Calculating market trends..."):
-                            trend_summary, enhanced_df = calculate_market_trend_score(comments_df)
-                            prediction = predict_purchase_volume(trend_summary, baseline_volume)
-    
-                    # Display key metrics
-                        st.subheader("Market Trend Overview")
-                        col1, col2, col3, col4 = st.columns(4)
-                        col1.metric("Market Trend Score", f"{trend_summary['overall_score']:.1f}/100", 
-                            trend_summary['trend_category'])
-                        col2.metric("Positive Sentiment", f"{trend_summary['positive_sentiment_ratio']*100:.1f}%")
-                        col3.metric("Purchase Intent", f"{trend_summary['purchase_intent_ratio']*100:.1f}%")
-                        col4.metric("Viral Potential", f"{trend_summary.get('viral_potential', 0):.1f}%")
-    
-                        # Plot market prediction visualization
-                    st.subheader("Market Trend Visualization")
-                    market_fig = plot_market_prediction(enhanced_df, trend_summary)
-                    st.pyplot(market_fig)
-    
-                    # Display sales prediction
-                    st.subheader("Sales Prediction")
-                    st.write(f"Predicted Sales Volume: {prediction['predicted_volume']:.0f} units")
-                    st.write(f"Prediction Range: {prediction['min_prediction']:.0f} to {prediction['max_prediction']:.0f} units")
-    
-                    # Show full report
-                    with st.expander("View Full Market Trend Report"):
-                        report = generate_market_trend_report(enhanced_df, product_name, prediction)
-                        st.markdown(report)
-        
-                            # Allow download of the report
-                        report_bytes = report.encode()
-                        st.download_button(
-                            label="Download Market Report",
-                            data=report_bytes,
-                            file_name=f"{product_name.replace(' ', '_')}_market_report.md",
-                            mime="text/markdown",
-                    )
-    
-                            # For a more comprehensive analysis, use the add_market_trends_tab function
-                        # Additional market visualizations
-                        st.subheader("Purchase Intent Distribution")
-                        intent_fig = px.histogram(enhanced_df, 
-                                                  x='purchase_intent', 
-                                                nbins=20, 
-                                                title="Distribution of Purchase Intent",
-                                                color_discrete_sequence=['#0074D9'])
-                        intent_fig.update_layout(xaxis_title="Purchase Intent Score", 
-                                                yaxis_title="Number of Comments")
-                        st.plotly_chart(intent_fig, use_container_width=True)
-                    
                 else:
                     st.error("Failed to fetch comments. Please check the video link and try again.")
                 
@@ -1293,30 +1151,13 @@ elif page == "Sentiment Explorer":
             # Perform sentiment analysis
             vader_sentiment = analyze_sentiment_vader(processed['demojized'])
             combined_sentiment = combined_sentiment_analysis(processed['demojized'])
-            full_analysis = analyze_comment_with_trolling(test_comment, language_mode)
-            enhanced_sentiment = full_analysis['sentiment_text']
+            enhanced_sentiment = analyze_sentiment_with_language_preference(test_comment, language_mode)
             
             # Display sentiment results
             st.subheader("Sentiment Analysis")
             st.write(f"**VADER:** {vader_sentiment}")
             st.write(f"**Combined:** {combined_sentiment}")
             st.write(f"**Enhanced (with language detection):** {enhanced_sentiment}")
-            st.subheader("Troll Detection")
-            st.write(f"**Is Troll Comment:** {'Yes' if full_analysis['is_troll'] else 'No'}")
-            st.write(f"**Troll Score:** {full_analysis['troll_score']:.2f} (Higher values indicate more troll-like behavior)")
-            if full_analysis['is_troll']:
-             st.markdown("""
-            <div style="background-color: #ffebee; padding: 10px; border-radius: 5px; border-left: 5px solid #f44336;">
-                <h4 style="color: #b71c1c; margin-top: 0;">Troll Comment Detected</h4>
-                <p>This comment shows characteristics commonly found in trolling behavior:</p>
-                <ul>
-                <li>Aggressive or inflammatory language</li>
-                <li>Excessive punctuation or capitalization</li>
-                <li>Use of insults or derogatory terms</li>
-                <li>Potential use of sarcasm or baiting language</li>
-            </ul>
-            </div>
-            """, unsafe_allow_html=True)
         
         with col2:
             # Display sentiment breakdown
