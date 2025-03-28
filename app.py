@@ -18,6 +18,14 @@ from tagalog_sentiment import (
     tagalog_enhanced_sentiment_analysis,
     get_tagalog_sentiment_breakdown
 )
+from market_trend_analysis import (
+    detect_purchase_intent,
+    calculate_market_trend_score,
+    predict_purchase_volume,
+    plot_market_prediction,
+    generate_market_trend_report,
+    add_market_trends_tab
+)
 from text_processing import clean_text, tokenize_and_remove_stopwords, extract_hashtags
 from dotenv import load_dotenv
 import os
@@ -704,7 +712,7 @@ elif page == "Upload Data":
                     
                 
                 # Create tabs for different views
-                tab1, tab2, tab3, tab4 = st.tabs(["Data View", "Visualizations", "Sentiment Analysis", "Statistics"])
+                tab1, tab2, tab3, tab4, tab5 = st.tabs(["Data View", "Visualizations", "Sentiment Analysis", "Statistics", "Market Trends"])
                 
                 with tab1:
                     # Display data
@@ -885,7 +893,75 @@ elif page == "Upload Data":
                         st.pyplot(fig)
                     else:
                         st.info("No hashtags found in the comments.")
-
+                with tab5:
+                        st.header("Market Trend Analysis")
+    
+                        # Get baseline purchase volume
+                        col1, col2 = st.columns(2)
+                        baseline_volume = col1.number_input(
+                        "Baseline monthly sales volume:", 
+                            min_value=100, 
+                            value=1000,
+                            key="fetch_tab5_baseline_volume"  # Add this unique key
+                        )
+                        product_name = col2.text_input(
+                            "Product name:", 
+                            value="TikTok Product",
+                            key="fetch_tab5_product_name"  # Add this unique key
+                        )
+                        # Calculate purchase intent for each comment
+                        with st.spinner("Calculating purchase intent..."):
+                            comments_df['purchase_intent'] = detect_purchase_intent(comments_df['Comment'])
+    
+                        # Calculate market trend scores
+                        with st.spinner("Calculating market trends..."):
+                            trend_summary, enhanced_df = calculate_market_trend_score(comments_df)
+                            prediction = predict_purchase_volume(trend_summary, baseline_volume)
+    
+                        # Display key metrics
+                        st.subheader("Market Trend Overview")
+                        col1, col2, col3, col4 = st.columns(4)
+                        col1.metric("Market Trend Score", f"{trend_summary['overall_score']:.1f}/100", 
+                        trend_summary['trend_category'])
+                        col2.metric("Positive Sentiment", f"{trend_summary['positive_sentiment_ratio']*100:.1f}%")
+                        col3.metric("Purchase Intent", f"{trend_summary['purchase_intent_ratio']*100:.1f}%")
+                        col4.metric("Viral Potential", f"{trend_summary.get('viral_potential', 0):.1f}%")
+    
+                        # Plot market prediction visualization
+                        st.subheader("Market Trend Visualization")
+                        market_fig = plot_market_prediction(enhanced_df, trend_summary)
+                        st.pyplot(market_fig)
+    
+                        # Display sales prediction
+                        st.subheader("Sales Prediction")
+                        st.write(f"Predicted Sales Volume: {prediction['predicted_volume']:.0f} units")
+                        st.write(f"Prediction Range: {prediction['min_prediction']:.0f} to {prediction['max_prediction']:.0f} units")
+    
+                        # Show full report
+                        with st.expander("View Full Market Trend Report"):
+                            report = generate_market_trend_report(enhanced_df, product_name, prediction)
+                            st.markdown(report)
+        
+                        # Allow download of the report
+                        report_bytes = report.encode()
+                        st.download_button(
+                            label="Download Market Report",
+                            data=report_bytes,
+                            file_name=f"{product_name.replace(' ', '_')}_market_report.md",
+                            mime="text/markdown",
+                        )
+    
+                                # Additional market visualizations
+                        st.subheader("Purchase Intent Distribution")
+                        intent_fig = px.histogram(enhanced_df, 
+                                                x='purchase_intent', 
+                                                nbins=20, 
+                                                title="Distribution of Purchase Intent",
+                                                color_discrete_sequence=['#0074D9'])
+                        intent_fig.update_layout(xaxis_title="Purchase Intent Score", 
+                                                yaxis_title="Number of Comments")
+                        st.plotly_chart(intent_fig, use_container_width=True)
+                     
 # TikTok Comment Fetching
 elif page == "Fetch TikTok Comments":
     st.header("Fetch TikTok Comments")
@@ -938,7 +1014,8 @@ elif page == "Fetch TikTok Comments":
                                                  )
                     
                     # Create tabs for different views
-                    tab1, tab2, tab3, tab4 = st.tabs(["Data View", "Visualizations", "Sentiment Analysis", "Statistics"])
+                    tab1, tab2, tab3, tab4, tab5 = st.tabs(["Data View", "Visualizations", "Sentiment Analysis", "Statistics", "Market Trends"])
+
                     
                     with tab1:
                         # Display data
@@ -1106,10 +1183,74 @@ elif page == "Fetch TikTok Comments":
                             sns.barplot(y=hashtag_df['Hashtag'], x=hashtag_df['Count'], ax=ax, orient='h')
                             ax.set_title('Top 15 Hashtags')
                             st.pyplot(fig)
+                    
                         else:
                             st.info("No hashtags found in the comments.")
+                    with tab5:
+                        st.header("Market Trend Analysis")
+    
+                        # Get baseline purchase volume
+                        col1, col2 = st.columns(2)
+                        baseline_volume = col1.number_input("Baseline monthly sales volume:", min_value=100, value=1000, key="fetch_tab5_baseline_volume")
+                        product_name = col2.text_input("Product name:", value="TikTok Product", key="fetch_tab5_product_name")
+    
+                        # Calculate purchase intent for each comment
+                        with st.spinner("Calculating purchase intent..."):
+                            comments_df['purchase_intent'] = detect_purchase_intent(comments_df['Comment'])
+    
+    # Calculate market trend scores
+                        with st.spinner("Calculating market trends..."):
+                            trend_summary, enhanced_df = calculate_market_trend_score(comments_df)
+                            prediction = predict_purchase_volume(trend_summary, baseline_volume)
+    
+                    # Display key metrics
+                        st.subheader("Market Trend Overview")
+                        col1, col2, col3, col4 = st.columns(4)
+                        col1.metric("Market Trend Score", f"{trend_summary['overall_score']:.1f}/100", 
+                            trend_summary['trend_category'])
+                        col2.metric("Positive Sentiment", f"{trend_summary['positive_sentiment_ratio']*100:.1f}%")
+                        col3.metric("Purchase Intent", f"{trend_summary['purchase_intent_ratio']*100:.1f}%")
+                        col4.metric("Viral Potential", f"{trend_summary.get('viral_potential', 0):.1f}%")
+    
+                        # Plot market prediction visualization
+                    st.subheader("Market Trend Visualization")
+                    market_fig = plot_market_prediction(enhanced_df, trend_summary)
+                    st.pyplot(market_fig)
+    
+                    # Display sales prediction
+                    st.subheader("Sales Prediction")
+                    st.write(f"Predicted Sales Volume: {prediction['predicted_volume']:.0f} units")
+                    st.write(f"Prediction Range: {prediction['min_prediction']:.0f} to {prediction['max_prediction']:.0f} units")
+    
+                    # Show full report
+                    with st.expander("View Full Market Trend Report"):
+                        report = generate_market_trend_report(enhanced_df, product_name, prediction)
+                        st.markdown(report)
+        
+                            # Allow download of the report
+                        report_bytes = report.encode()
+                        st.download_button(
+                            label="Download Market Report",
+                            data=report_bytes,
+                            file_name=f"{product_name.replace(' ', '_')}_market_report.md",
+                            mime="text/markdown",
+                    )
+    
+                            # For a more comprehensive analysis, use the add_market_trends_tab function
+                        # Additional market visualizations
+                        st.subheader("Purchase Intent Distribution")
+                        intent_fig = px.histogram(enhanced_df, 
+                                                  x='purchase_intent', 
+                                                nbins=20, 
+                                                title="Distribution of Purchase Intent",
+                                                color_discrete_sequence=['#0074D9'])
+                        intent_fig.update_layout(xaxis_title="Purchase Intent Score", 
+                                                yaxis_title="Number of Comments")
+                        st.plotly_chart(intent_fig, use_container_width=True)
+                    
                 else:
                     st.error("Failed to fetch comments. Please check the video link and try again.")
+                
         else:
             st.warning("Please enter a TikTok video link.")
 
@@ -1203,6 +1344,117 @@ elif page == "Sentiment Explorer":
                 """)
             
             st.write("The final sentiment is a weighted combination of all methods, with language-specific optimizations.")
+    # Market Trends standalone page
+elif page == "Market Trends":
+    st.header("Market Trend Analysis")
+    
+    st.write("""
+    This section allows you to analyze purchase intent and predict market trends based on sentiment analysis.
+    Upload data using the 'Upload Data' section or fetch comments from TikTok, then return here to perform market trend analysis.
+    """)
+    
+    # Check if we have data in session state
+    if 'comments_df' in st.session_state and not st.session_state.comments_df.empty:
+        comments_df = st.session_state.comments_df
+        
+        # Get baseline purchase volume
+        col1, col2 = st.columns(2)
+        baseline_volume = col1.number_input("Baseline monthly sales volume:", min_value=100, value=1000)
+        product_name = col2.text_input("Product name:", value="TikTok Product")
+        
+        # Manually calculate purchase intent to demonstrate this function
+        with st.spinner("Detecting purchase intent..."):
+            comments_df['purchase_intent'] = detect_purchase_intent(comments_df['Comment'])
+            # Display sample comments with high purchase intent
+            high_intent = comments_df[comments_df['purchase_intent'] > 0.4].sort_values('purchase_intent', ascending=False)
+            if not high_intent.empty:
+                st.subheader("Sample Comments with High Purchase Intent")
+                for i, (_, row) in enumerate(high_intent.head(3).iterrows()):
+                    st.write(f"**{i+1}. \"{row['Comment']}\"** - Intent Score: {row['purchase_intent']:.2f}")
+        
+        # Calculate market trend scores
+        with st.spinner("Calculating market trends..."):
+            trend_summary, enhanced_df = calculate_market_trend_score(comments_df)
+            prediction = predict_purchase_volume(trend_summary, baseline_volume)
+        
+        # Show market prediction visualization
+        st.subheader("Market Trend Visualization")
+        market_fig = plot_market_prediction(enhanced_df, trend_summary)
+        st.pyplot(market_fig)
+        
+        # Show the full report
+        st.subheader("Market Trend Report")
+        report = generate_market_trend_report(enhanced_df, product_name, prediction)
+        st.markdown(report)
+        
+        # Allow download of the report
+        report_bytes = report.encode()
+        st.download_button(
+            label="Download Market Report",
+            data=report_bytes,
+            file_name=f"{product_name.replace(' ', '_')}_market_report.md",
+            mime="text/markdown",
+        )
+        
+        # For comprehensive UI, add the full market trends tab
+        st.subheader("Full Market Analysis Dashboard")
+        add_market_trends_tab(comments_df, key_prefix="comprehensive_")
+        
+    else:
+        # Same sample data code as before
+        st.info("Please upload data or fetch TikTok comments first to perform market trend analysis.")
+        
+        if st.button("Use Sample Dataset"):
+            # Create a sample dataset with purchase intent scenarios
+            sample_data = {
+                'Comment': [
+                    "I absolutely love this product! Going to buy it right away.",
+                    "This is okay, not sure if I'll get it.",
+                    "Horrible quality, don't waste your money.",
+                    "Just ordered this, can't wait for it to arrive!",
+                    "Where can I buy this? Need it ASAP!",
+                    "Not worth the price, disappointed.",
+                    "Best purchase I've made this year!",
+                    "Might get this for my birthday.",
+                    "Adding to cart now, thanks for sharing!",
+                    "Doesn't seem that useful to me.",
+                    "Shut up and take my money! This is amazing!",
+                    "Is the quality worth the price?",
+                    "Everyone is talking about this product!",
+                    "Five stars, highly recommend to anyone.",
+                    "Will this work for what I need?",
+                    "This product changed my life, so glad I bought it."
+                ]
+            }
+            sample_df = pd.DataFrame(sample_data)
+            
+            # Process sample data
+            processed_data = sample_df['Comment'].apply(preprocess_text)
+            sample_df['Processed Comment'] = processed_data.apply(lambda x: x['cleaned_text'])
+            sample_df['Enhanced Sentiment'] = sample_df['Comment'].apply(
+                lambda text: analyze_sentiment_with_language_preference(text)
+            )
+            
+            # Calculate purchase intent - explicitly use the imported function
+            sample_df['purchase_intent'] = detect_purchase_intent(sample_df['Comment'])
+            
+            # Store in session state
+            st.session_state.comments_df = sample_df
+            
+            # Calculate and show market trends using all imported functions
+            trend_summary, enhanced_df = calculate_market_trend_score(sample_df)
+            prediction = predict_purchase_volume(trend_summary, 1000)
+            
+            st.subheader("Market Prediction Visualization (Sample Data)")
+            market_fig = plot_market_prediction(enhanced_df, trend_summary)
+            st.pyplot(market_fig)
+            
+            report = generate_market_trend_report(enhanced_df, "Sample Product", prediction)
+            with st.expander("Sample Market Report"):
+                st.markdown(report)
+            
+            # Show full UI
+            add_market_trends_tab(sample_df)
 
 # Run the app
 if __name__ == "__main__":
