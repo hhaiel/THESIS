@@ -27,32 +27,87 @@ except LookupError:
 # Enhanced emoji sentiment dictionary (expanded)
 EMOJI_SENTIMENT = {
     # Highly positive
-    "😍": 1.0, "🥰": 1.0, "❤️": 0.9, "😁": 0.9, "🔥": 0.8, 
-    "💯": 0.9, "✨": 0.7, "🙏": 0.7, "👑": 0.8, "🎉": 0.9,
+    "😊": 1.0,  # beaming face with smiling eyes
+    "🥰": 1.0,  # smiling face with hearts
+    "😍": 1.0,  # heart eyes
+    "❤️": 1.0,  # heart
+    "😁": 1.0,  # grinning face with smiling eyes
+    "😄": 0.9,  # grinning face with smiling eyes
+    "😃": 0.9,  # grinning face
+    "😀": 0.9,  # grinning face
+    "🤗": 1.0,  # hugging face
+    "🥳": 1.0,  # partying face
+    "😇": 1.0,  # smiling face with halo
+    "🙂": 0.8,  # slightly smiling face
+    "☺️": 0.8,  # smiling face
+    "😌": 0.8,  # relieved face
+    "😉": 0.7,  # winking face
+    "🤣": 0.7,  # rolling on the floor laughing
+    "😂": 0.7,  # face with tears of joy
+    "😆": 0.7,  # grinning squinting face
+    "😅": 0.6,  # grinning face with sweat
     
     # Moderately positive
-    "👍": 0.7, "😊": 0.7, "🤣": 0.8, "😂": 0.7, "😆": 0.6,
-    "👏": 0.6, "🥳": 0.8, "🤩": 0.9, "😎": 0.6, "💪": 0.7,
+    "👍": 0.7,  # thumbs up
+    "👏": 0.6,  # clapping hands
+    "🤩": 0.9,  # star-struck
+    "😎": 0.6,  # smiling face with sunglasses
+    "💪": 0.7,  # flexed biceps
     
     # Slightly positive
-    "👌": 0.4, "🙂": 0.3, "😉": 0.3, "😄": 0.5, "☺️": 0.4,
-    "😃": 0.5, "🤭": 0.3, "💕": 0.6, "💓": 0.6, "💖": 0.6,
+    "👌": 0.4,  # OK hand
+    "🤭": 0.3,  # face with hand over mouth
+    "💕": 0.6,  # two hearts
+    "💓": 0.6,  # beating heart
+    "💖": 0.6,  # sparkling heart
     
     # Neutral
-    "🤔": 0.0, "😐": 0.0, "🙄": -0.1, "😶": 0.0, "🤷": 0.0,
-    "⭐": 0.2, "📱": 0.0, "📸": 0.1, "🎵": 0.1, "🤨": -0.1,
+    "🤔": 0.0,  # thinking face
+    "😐": 0.0,  # neutral face
+    "🙄": -0.1,  # face with rolling eyes
+    "😶": 0.0,  # face without mouth
+    "🤷": 0.0,  # person shrugging
+    "⭐": 0.2,  # star
+    "📱": 0.0,  # mobile phone
+    "📸": 0.1,  # camera with flash
+    "🎵": 0.1,  # musical note
+    "🤨": -0.1,  # face with raised eyebrow
     
     # Slightly negative
-    "😒": -0.4, "😕": -0.3, "😟": -0.4, "😬": -0.3, "😧": -0.4,
-    "😓": -0.4, "😨": -0.5, "😥": -0.4, "😔": -0.4, "🙁": -0.3,
+    "😒": -0.4,  # unamused face
+    "😕": -0.3,  # confused face
+    "😟": -0.4,  # worried face
+    "😬": -0.3,  # grimacing face
+    "😧": -0.4,  # anguished face
+    "😓": -0.4,  # downcast face with sweat
+    "😨": -0.5,  # fearful face
+    "😥": -0.4,  # sad but relieved face
+    "😔": -0.4,  # pensive face
+    "🙁": -0.3,  # slightly frowning face
     
     # Moderately negative
-    "😢": -0.6, "😭": -0.6, "😡": -0.7, "👎": -0.7, "😠": -0.6,
-    "😤": -0.6, "😩": -0.6, "💔": -0.7, "😫": -0.6, "😖": -0.5,
+    "😢": -0.6,  # crying face
+    "😭": -0.6,  # loudly crying face
+    "😡": -0.7,  # pouting face
+    "👎": -0.7,  # thumbs down
+    "😠": -0.6,  # angry face
+    "😤": -0.6,  # face with steam from nose
+    "😩": -0.6,  # weary face
+    "💔": -0.7,  # broken heart
+    "😫": -0.6,  # tired face
+    "😖": -0.5,  # confounded face
     
     # Highly negative
-    "😱": -0.8, "🤬": -0.9, "😈": -0.7, "💀": -0.7, "🤢": -0.8,
-    "🤮": -0.9, "😷": -0.6, "🙅": -0.7, "👿": -0.8, "🤡": -0.5,
+    "😱": -0.8,  # face screaming in fear
+    "🤬": -0.9,  # face with symbols on mouth
+    "😈": -0.7,  # smiling face with horns
+    "💀": -0.7,  # skull
+    "🤢": -0.8,  # nauseated face
+    "🤮": -0.9,  # face vomiting
+    "😷": -0.6,  # face with medical mask
+    "🙅": -0.7,  # person gesturing no
+    "👿": -0.8,  # angry face with horns
+    "🤡": -0.5,  # clown face
 }
 
 # TikTok-specific sentiment lexicon
@@ -236,6 +291,22 @@ TROLL_PATTERNS = [
     r'(pinagkakitaan|kita|kumikita)\s*(lang)',  # Just for profit
     r'(puro|pure)\s*(kalokohan|pangako|promises)',  # Empty promises
     r'(panloloko|manloloko|pangloloko)',  # Deception terms
+    # Add these patterns to your TROLL_PATTERNS list
+
+    # Commercial solicitation patterns
+    r'(dm|message|contact)\s+(me|us|for|to)',  # DM solicitations
+    r'(collab|collaboration|ambassador|ambassadorship)',  # Collaboration requests
+    r'(rent|rental|for rent|available)',  # Rental offers
+    r'(shipping|ship|deliver|worldwide)',  # Shipping mentions
+    r'(follow|back|mutual|engage)',  # Follow-for-follow patterns
+    r'(jewelry|marketing|team|brand)',  # Marketing terms
+    r'(quality|products|better|best)',  # Product quality claims
+    r'(sourcing|purchasing|products from china)',  # Dropshipping references
+    r'(promo|code|discount|voucher)',  # Promotion offers
+    r'(send|receive|items|free|goodies)',  # Free item offers
+    r'(instagram|ig|tiktok)\s+(@|account)',  # Social media account solicitations
+    r'(clothes|wear|outfit|look)',  # Fashion promotion indicators
+    r'(check us out|visit|profile)',  # Profile visit requests
 ]
 def validate_regex_patterns(patterns):
     """
@@ -334,15 +405,21 @@ def detect_troll_patterns(text):
 
 def has_excessive_formatting(text):
     """
-    Check if text has excessive formatting typical of troll comments
+    Improved detection of excessive formatting typical of troll comments.
+    Now better handles different types of content.
     """
     # Check for ALL CAPS (if the comment is mostly uppercase)
     words = text.split()
-    if len(words) >= 2:  # Only check comments with at least 2 words
-        uppercase_words = sum(1 for word in words if word.isupper() and len(word) > 1)
-        uppercase_ratio = uppercase_words / len(words)
-        if uppercase_ratio > 0.5:  # If more than 50% of words are ALL CAPS
-            return 0.5
+    
+    # If comment is very short or emoji-only, formatting is less relevant
+    if len(words) < 2 or all(c in emoji.EMOJI_DATA for c in text.strip()):
+        return 0.0
+        
+    # Check for ALL CAPS    
+    uppercase_words = sum(1 for word in words if word.isupper() and len(word) > 1)
+    uppercase_ratio = uppercase_words / len(words)
+    if uppercase_ratio > 0.5:  # If more than 50% of words are ALL CAPS
+        return 0.5
     
     # Check for excessive punctuation
     punctuation_count = sum(1 for char in text if char in '!?.')
@@ -358,7 +435,9 @@ def has_excessive_formatting(text):
     return 0.0
 def analyze_emoji_sentiment_for_trolls(emoji_text):
     """
-    Check if the emojis in a comment indicate potential trolling
+    Enhanced analysis of emojis for troll detection.
+    Now properly handles positive vs negative emojis.
+    
     Returns a troll score from 0 to 1 based on emojis only
     """
     if not emoji_text:
@@ -380,6 +459,13 @@ def analyze_emoji_sentiment_for_trolls(emoji_text):
         "😴": 0.4,  # Sleeping - dismissive
         "🤓": 0.5,  # Nerd face - often used mockingly
     }
+    
+    # Get sentiment of emojis from the main emoji sentiment dictionary
+    general_sentiment = analyze_emoji_sentiment(emoji_text)
+    
+    # If emojis are clearly positive, they're less likely to be trolling
+    if general_sentiment > 0.7:
+        return 0.0
     
     total_score = 0
     count = 0
@@ -537,14 +623,18 @@ def analyze_emoji_sentiment(emoji_text):
     # Analyze each emoji in the text
     for char in emoji_text:
         if char in EMOJI_SENTIMENT:
-            total_score += EMOJI_SENTIMENT[char]
+            score = EMOJI_SENTIMENT[char]
+            total_score += score
             count += 1
+            print(f"Emoji: {char}, Score: {score}")  # Debug line
     
     # If no known emojis were found
     if count == 0:
         return 0.0
         
-    return total_score / count
+    final_score = total_score / count
+    print(f"Final emoji score: {final_score}")  # Debug line
+    return final_score
 
 def train_with_labeled_data():
     """
@@ -845,162 +935,6 @@ def train_mnb_model(text_series):
         
     return pd.Series(result)
 
-# Comprehensive sentiment analysis function
-def combined_sentiment_analysis(text_series):
-    """
-    Combines multiple sentiment analysis techniques for improved accuracy.
-    
-    Args:
-        text_series: Pandas Series containing text
-    
-    Returns:
-        Series of combined sentiment results
-    """
-    # Convert to list if it's a single string
-    single_input = False
-    if isinstance(text_series, str):
-        text_series = [text_series]
-        single_input = True
-    
-    results = []
-    
-    for text in text_series:
-        if not isinstance(text, str) or not text:
-            results.append("Neutral (0.00)")
-            continue
-        
-        # Process text - this now includes language detection
-        processed = preprocess_for_sentiment(text)
-        detected_language = processed['language']  # Get the detected language
-        
-        # Get VADER sentiment
-        sid = SentimentIntensityAnalyzer()
-        vader_scores = sid.polarity_scores(text)
-        vader_compound = vader_scores['compound']
-        
-        # Extract emojis
-        emojis_found = processed['emojis']
-        
-        # Get emoji sentiment if emojis exist
-        emoji_score = 0
-        if emojis_found:
-            emoji_score = analyze_emoji_sentiment(emojis_found)
-        
-        # Get TikTok lexicon sentiment - pass the detected language
-        lexicon_score = analyze_lexicon_sentiment(text, detected_language)
-        
-        # Weight the scores
-        weights = {
-            'vader': 0.6,  # VADER has highest weight
-            'emoji': 0.2,  # Emojis are important in TikTok content
-            'lexicon': 0.2  # TikTok-specific lexicon
-        }
-        
-        final_score = (
-            vader_compound * weights['vader'] +
-            emoji_score * weights['emoji'] +
-            lexicon_score * weights['lexicon']
-        )
-        
-        # Adjust thresholds for TikTok content which tends to be more polarized
-        if final_score >= 0.05:
-            results.append(f"Positive ({final_score:.2f})")
-        elif final_score <= -0.05:
-            results.append(f"Negative ({final_score:.2f})")
-        else:
-            results.append(f"Neutral ({final_score:.2f})")
-    
-    if single_input:
-        return results[0]
-        
-    return pd.Series(results)
-
-# Enhanced sentiment analysis with ensemble approach
-def enhanced_sentiment_analysis(text_series):
-    """
-    Ensemble approach combining multiple sentiment analysis methods.
-    
-    Args:
-        text_series: Pandas Series or string containing text
-    
-    Returns:
-        Combined sentiment results
-    """
-    # Convert to list if it's a single string
-    single_input = False
-    if isinstance(text_series, str):
-        text_series = [text_series]
-        single_input = True
-    
-    results = []
-    
-    for text in text_series:
-        if not isinstance(text, str) or not text:
-            results.append("Neutral (0.00)")
-            continue
-        
-        # Process text for analysis
-        processed = preprocess_for_sentiment(text)
-        clean_text = processed['processed_text']
-        
-        # Get scores from different methods
-        
-        # VADER sentiment (rule-based)
-        vader_sentiment = analyze_sentiment_vader(text)
-        vader_score = float(re.search(r'\(([-+]?\d+\.\d+)\)', vader_sentiment).group(1))
-        
-        # ML model prediction
-        try:
-            ml_sentiment = predict_sentiment_ml(clean_text)
-            ml_score_match = re.search(r'\(([-+]?\d+\.\d+)\)', ml_sentiment)
-            ml_score = float(ml_score_match.group(1)) if ml_score_match else 0.0
-            
-            # Convert categorical to numerical (-1 to 1 scale)
-            if "Positive" in ml_sentiment:
-                ml_score = abs(ml_score)
-            elif "Negative" in ml_sentiment:
-                ml_score = -abs(ml_score)
-            else:
-                ml_score = 0.0
-        except:
-            # If ML prediction fails
-            ml_score = 0.0
-        
-        # Emoji analysis
-        emoji_score = analyze_emoji_sentiment(processed['emojis'])
-        
-        # TikTok lexicon analysis
-        lexicon_score = analyze_lexicon_sentiment(text)
-        
-        # Weight the scores
-        weights = {
-            'vader': 0.4,   # VADER is reliable for social media
-            'ml': 0.3,      # ML model captures patterns
-            'emoji': 0.15,  # Emojis are important in TikTok
-            'lexicon': 0.15 # TikTok-specific language
-        }
-        
-        # Calculate weighted ensemble score
-        final_score = (
-            vader_score * weights['vader'] +
-            ml_score * weights['ml'] +
-            emoji_score * weights['emoji'] +
-            lexicon_score * weights['lexicon']
-        )
-        
-        # Determine sentiment category
-        if final_score >= 0.05:
-            results.append(f"Positive ({final_score:.2f})")
-        elif final_score <= -0.05:
-            results.append(f"Negative ({final_score:.2f})")
-        else:
-            results.append(f"Neutral ({final_score:.2f})")
-    
-    if single_input:
-        return results[0]
-    
-    return pd.Series(results)
-
 # Function to get sentiment scores breakdown
 def get_sentiment_breakdown(text):
     """
@@ -1052,12 +986,12 @@ def get_sentiment_breakdown(text):
     except:
         ml_score = 0.0
     
-    # Weight the scores
+    # Adjusted weights - MNB now has higher weight than VADER
     weights = {
-        'vader': 0.4,
-        'ml': 0.3,
-        'emoji': 0.15,
-        'lexicon': 0.15
+        'vader': 0.35,  # Reduced from 0.4
+        'ml': 0.40,     # Increased from 0.3
+        'emoji': 0.15,  # Kept the same
+        'lexicon': 0.10 # Slightly reduced
     }
     
     # Calculate final score
@@ -1088,7 +1022,7 @@ def get_sentiment_breakdown(text):
 # Function to analyze comments for trolling behavior
 def analyze_for_trolling(text):
     """
-    Perform comprehensive analysis to detect troll comments.
+    Perform comprehensive analysis to detect troll comments with improved accuracy.
     Returns a dictionary with troll score and language information.
     
     Args:
@@ -1101,55 +1035,101 @@ def analyze_for_trolling(text):
     processed = preprocess_for_sentiment(text)
     language = processed['language']
     
+    # Check if text is only emojis
+    emojis_found = processed['emojis']
+    is_emoji_only = len(text.strip()) == len(emojis_found)
+    
+    # For emoji-only comments, we need special handling
+    if is_emoji_only:
+        # Check if emojis are positive
+        emoji_score = analyze_emoji_sentiment(emojis_found)
+        
+        # If predominantly positive emojis, this is likely not a troll
+        if emoji_score > 0.3:
+            return {
+                'troll_score': 0.0,
+                'language': language,
+                'is_troll': False,
+                'sentiment': "Positive",
+                'sentiment_score': emoji_score
+            }
+    
     # Get troll pattern score
     troll_pattern_score = detect_troll_patterns(text)
     
     # Get sentiment scores
     sentiment_breakdown = get_sentiment_breakdown(text)
-    # Troll comments often have extreme negative sentiment
     sentiment_score = sentiment_breakdown['final']
-    
-    # Extract emojis from text
-    emojis_found = ''.join(c for c in text if c in emoji.EMOJI_DATA)
     
     # Get emoji troll score if emojis exist
     emoji_troll_score = 0
     if emojis_found:
         emoji_troll_score = analyze_emoji_sentiment_for_trolls(emojis_found)
     
-    # Troll comments often have extreme negative sentiment
-    sentiment_score = sentiment_breakdown['final']
-    
     # Higher troll likelihood if extremely negative sentiment
     sentiment_factor = 0.0
-    if sentiment_score <= -0.7:  # Very negative content - increased from -0.6
-        sentiment_factor = 0.4   # Increased from 0.3
-    elif sentiment_score <= -0.4:  # Moderately negative - increased from -0.3
-        sentiment_factor = 0.2   # Increased from 0.1
-    elif sentiment_score <= -0.2:  # Slightly negative - new bracket
-        sentiment_factor = 0.1   # New level
+    if sentiment_score <= -0.7:
+        sentiment_factor = 0.4
+    elif sentiment_score <= -0.4:
+        sentiment_factor = 0.2
+    elif sentiment_score <= -0.2:
+        sentiment_factor = 0.1
+    
     # Check for very short comments with strong negative words
     words = re.findall(r'\b\w+\b', text.lower())
     strong_negative_count = sum(1 for word in words if word in FILIPINO_LEXICON 
                               and FILIPINO_LEXICON[word] <= -0.7)
     
-    # (Add this before calculating final_troll_score)
-    is_short_comment = len(text.split()) < 5  # Less than 5 words
+    # Short negative comments are often trolls
+    is_short_comment = len(words) < 5
     if is_short_comment and strong_negative_count > 0:
-        additional_factor = 0.2  # Short negative comments are often trolls
+        additional_factor = 0.2
     else:
         additional_factor = 0.0
+    
     # Check for excessive formatting
     formatting_score = has_excessive_formatting(text)
 
-    # Add emoji troll factor (weighted at 0.3)
-    emoji_factor = emoji_troll_score * 0.3
-    # Final troll score combines all factors
-    final_troll_score = min(1.0, troll_pattern_score + sentiment_factor + 
-                         additional_factor + emoji_factor + formatting_score)
+    # Reduce emoji factor for predominantly positive emojis
+    if emojis_found and analyze_emoji_sentiment(emojis_found) > 0.5:
+        emoji_factor = 0.0  # Positive emojis shouldn't contribute to troll score
+    else:
+        emoji_factor = emoji_troll_score * 0.3
     
-    # Flag as troll if score exceeds threshold (adjust as needed)
+    # Context-aware analysis: comment length impacts significance of factors
+    if len(words) > 10:  # Longer comments
+        # Content matters more than formatting for longer comments
+        troll_pattern_weight = 0.6
+        formatting_weight = 0.2
+    else:  # Shorter comments
+        # Formatting and patterns are more significant in short comments
+        troll_pattern_weight = 0.4
+        formatting_weight = 0.4
+    
+    # Final troll score with weighted factors
+    final_troll_score = min(1.0, 
+                         (troll_pattern_score * troll_pattern_weight) + 
+                         sentiment_factor + 
+                         additional_factor + 
+                         emoji_factor + 
+                         (formatting_score * formatting_weight))
+    
+    # Flag as troll if score exceeds threshold
     is_troll = final_troll_score >= 0.3
+    
+    # Add commercial spam detection
+    commercial_spam_score = detect_commercial_spam(text)
+    
+    # If very high commercial spam score, this is likely spam rather than a troll
+    if commercial_spam_score > 0.6:
+        return {
+            'troll_score': commercial_spam_score,
+            'language': language,
+            'is_troll': True,
+            'is_commercial_spam': True,  # Add this flag to indicate commercial spam
+            'sentiment': sentiment_breakdown['sentiment'],
+            'sentiment_score': sentiment_score
+        }
     
     return {
         'troll_score': final_troll_score,
@@ -1189,4 +1169,52 @@ if __name__ == "__main__":
     print("\nTesting a single comment:")
     result = analyze_for_trolling("Ang pangit ng content mo, walang kwenta!!!")
     print(f"Troll Score: {result['troll_score']:.2f} (Is Troll: {result['is_troll']})")
+    
+def detect_commercial_spam(text):
+    """
+    Detect commercial spam patterns in comments.
+    Returns a score from 0 (not spam-like) to 1 (likely spam).
+    """
+    if not isinstance(text, str) or not text:
+        return 0.0
+    
+    # Initialize score
+    spam_score = 0.0
+    
+    # Common commercial spam indicators
+    commercial_patterns = [
+        r'(dm|message)\s+(me|us)\s+for',
+        r'(collab|collaboration|ambassador)',
+        r'(follow|back|mutual)\s+(me|back)',
+        r'(shipping|worldwide|delivery)',
+        r'(brand|marketing|team)',
+        r'(instagram|dm)\s+(@\w+)',
+        r'(check|visit)\s+(out|profile)',
+        r'(we|i)\s+(would|will)\s+(love|like)',
+        r'(better|quality|best)\s+(products|quality)',
+        r'(china|sourcing|supplier)',
+        r'(we|i)\s+(offer|provide|sell|have)',
+        r'(code|discount|promo|voucher)',
+        r'(invest|opportunity|business)'
+    ]
+    
+    # Check for pattern matches
+    pattern_matches = 0
+    for pattern in commercial_patterns:
+        if re.search(pattern, text, re.IGNORECASE):
+            pattern_matches += 1
+    
+    # Calculate score based on matches
+    if pattern_matches > 0:
+        spam_score += min(0.9, pattern_matches * 0.15)
+    
+    # Check for social media handles or URLs
+    if re.search(r'@\w+|https?://\S+|www\.\S+', text):
+        spam_score += 0.2
+    
+    # Cross-promotion indicators
+    if re.search(r'follow|dm|message|contact', text, re.IGNORECASE) and re.search(r'instagram|ig|email|dm', text, re.IGNORECASE):
+        spam_score += 0.3
+    
+    return min(1.0, spam_score)  # Cap at 1.0
     
