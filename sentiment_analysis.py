@@ -27,32 +27,87 @@ except LookupError:
 # Enhanced emoji sentiment dictionary (expanded)
 EMOJI_SENTIMENT = {
     # Highly positive
-    "😍": 1.0, "🥰": 1.0, "❤️": 0.9, "😁": 0.9, "🔥": 0.8, 
-    "💯": 0.9, "✨": 0.7, "🙏": 0.7, "👑": 0.8, "🎉": 0.9,
+    "😊": 1.0,  # beaming face with smiling eyes
+    "🥰": 1.0,  # smiling face with hearts
+    "😍": 1.0,  # heart eyes
+    "❤️": 1.0,  # heart
+    "😁": 1.0,  # grinning face with smiling eyes
+    "😄": 0.9,  # grinning face with smiling eyes
+    "😃": 0.9,  # grinning face
+    "😀": 0.9,  # grinning face
+    "🤗": 1.0,  # hugging face
+    "🥳": 1.0,  # partying face
+    "😇": 1.0,  # smiling face with halo
+    "🙂": 0.8,  # slightly smiling face
+    "☺️": 0.8,  # smiling face
+    "😌": 0.8,  # relieved face
+    "😉": 0.7,  # winking face
+    "🤣": 0.7,  # rolling on the floor laughing
+    "😂": 0.7,  # face with tears of joy
+    "😆": 0.7,  # grinning squinting face
+    "😅": 0.6,  # grinning face with sweat
     
     # Moderately positive
-    "👍": 0.7, "😊": 0.7, "🤣": 0.8, "😂": 0.7, "😆": 0.6,
-    "👏": 0.6, "🥳": 0.8, "🤩": 0.9, "😎": 0.6, "💪": 0.7,
+    "👍": 0.7,  # thumbs up
+    "👏": 0.6,  # clapping hands
+    "🤩": 0.9,  # star-struck
+    "😎": 0.6,  # smiling face with sunglasses
+    "💪": 0.7,  # flexed biceps
     
     # Slightly positive
-    "👌": 0.4, "🙂": 0.3, "😉": 0.3, "😄": 0.5, "☺️": 0.4,
-    "😃": 0.5, "🤭": 0.3, "💕": 0.6, "💓": 0.6, "💖": 0.6,
+    "👌": 0.4,  # OK hand
+    "🤭": 0.3,  # face with hand over mouth
+    "💕": 0.6,  # two hearts
+    "💓": 0.6,  # beating heart
+    "💖": 0.6,  # sparkling heart
     
     # Neutral
-    "🤔": 0.0, "😐": 0.0, "🙄": -0.1, "😶": 0.0, "🤷": 0.0,
-    "⭐": 0.2, "📱": 0.0, "📸": 0.1, "🎵": 0.1, "🤨": -0.1,
+    "🤔": 0.0,  # thinking face
+    "😐": 0.0,  # neutral face
+    "🙄": -0.1,  # face with rolling eyes
+    "😶": 0.0,  # face without mouth
+    "🤷": 0.0,  # person shrugging
+    "⭐": 0.2,  # star
+    "📱": 0.0,  # mobile phone
+    "📸": 0.1,  # camera with flash
+    "🎵": 0.1,  # musical note
+    "🤨": -0.1,  # face with raised eyebrow
     
     # Slightly negative
-    "😒": -0.4, "😕": -0.3, "😟": -0.4, "😬": -0.3, "😧": -0.4,
-    "😓": -0.4, "😨": -0.5, "😥": -0.4, "😔": -0.4, "🙁": -0.3,
+    "😒": -0.4,  # unamused face
+    "😕": -0.3,  # confused face
+    "😟": -0.4,  # worried face
+    "😬": -0.3,  # grimacing face
+    "😧": -0.4,  # anguished face
+    "😓": -0.4,  # downcast face with sweat
+    "😨": -0.5,  # fearful face
+    "😥": -0.4,  # sad but relieved face
+    "😔": -0.4,  # pensive face
+    "🙁": -0.3,  # slightly frowning face
     
     # Moderately negative
-    "😢": -0.6, "😭": -0.6, "😡": -0.7, "👎": -0.7, "😠": -0.6,
-    "😤": -0.6, "😩": -0.6, "💔": -0.7, "😫": -0.6, "😖": -0.5,
+    "😢": -0.6,  # crying face
+    "😭": -0.6,  # loudly crying face
+    "😡": -0.7,  # pouting face
+    "👎": -0.7,  # thumbs down
+    "😠": -0.6,  # angry face
+    "😤": -0.6,  # face with steam from nose
+    "😩": -0.6,  # weary face
+    "💔": -0.7,  # broken heart
+    "😫": -0.6,  # tired face
+    "😖": -0.5,  # confounded face
     
     # Highly negative
-    "😱": -0.8, "🤬": -0.9, "😈": -0.7, "💀": -0.7, "🤢": -0.8,
-    "🤮": -0.9, "😷": -0.6, "🙅": -0.7, "👿": -0.8, "🤡": -0.5,
+    "😱": -0.8,  # face screaming in fear
+    "🤬": -0.9,  # face with symbols on mouth
+    "😈": -0.7,  # smiling face with horns
+    "💀": -0.7,  # skull
+    "🤢": -0.8,  # nauseated face
+    "🤮": -0.9,  # face vomiting
+    "😷": -0.6,  # face with medical mask
+    "🙅": -0.7,  # person gesturing no
+    "👿": -0.8,  # angry face with horns
+    "🤡": -0.5,  # clown face
 }
 
 # TikTok-specific sentiment lexicon
@@ -236,6 +291,21 @@ TROLL_PATTERNS = [
     r'(pinagkakitaan|kita|kumikita)\s*(lang)',  # Just for profit
     r'(puro|pure)\s*(kalokohan|pangako|promises)',  # Empty promises
     r'(panloloko|manloloko|pangloloko)',  # Deception terms
+
+        # Commercial solicitation patterns
+    r'(dm|message|contact)\s+(me|us|for|to)',  # DM solicitations
+    r'(collab|collaboration|ambassador|ambassadorship)',  # Collaboration requests
+    r'(rent|rental|for rent|available)',  # Rental offers
+    r'(shipping|ship|deliver|worldwide)',  # Shipping mentions
+    r'(follow|back|mutual|engage)',  # Follow-for-follow patterns
+    r'(jewelry|marketing|team|brand)',  # Marketing terms
+    r'(quality|products|better|best)',  # Product quality claims
+    r'(sourcing|purchasing|products from china)',  # Dropshipping references
+    r'(promo|code|discount|voucher)',  # Promotion offers
+    r'(send|receive|items|free|goodies)',  # Free item offers
+    r'(instagram|ig|tiktok)\s+(@|account)',  # Social media account solicitations
+    r'(clothes|wear|outfit|look)',  # Fashion promotion indicators
+    r'(check us out|visit|profile)',  # Profile visit requests
 ]
 def validate_regex_patterns(patterns):
     """
@@ -553,7 +623,7 @@ def train_with_labeled_data():
     """
     try:
         # Try to load labeled data
-        labeled_data = pd.read_csv('sentiment_corrections.csv')
+        labeled_data = pd.read_csv('trained_data.csv')
         
         if len(labeled_data) < 10:
             # Not enough data yet
@@ -918,13 +988,14 @@ def combined_sentiment_analysis(text_series):
 # Enhanced sentiment analysis with ensemble approach
 def enhanced_sentiment_analysis(text_series):
     """
-    Ensemble approach combining multiple sentiment analysis methods.
+    Uses MNB as the primary model but makes minor adjustments based on emojis
+    and domain-specific lexicons, particularly for edge cases.
     
     Args:
         text_series: Pandas Series or string containing text
     
     Returns:
-        Combined sentiment results
+        Sentiment results based on MNB with minor enhancements
     """
     # Convert to list if it's a single string
     single_input = False
@@ -942,59 +1013,86 @@ def enhanced_sentiment_analysis(text_series):
         # Process text for analysis
         processed = preprocess_for_sentiment(text)
         clean_text = processed['processed_text']
+        language = processed['language']
         
-        # Get scores from different methods
+        # Get the MNB prediction first
+        mnb_sentiment = train_mnb_model(clean_text)
         
-        # VADER sentiment (rule-based)
-        vader_sentiment = analyze_sentiment_vader(text)
-        vader_score = float(re.search(r'\(([-+]?\d+\.\d+)\)', vader_sentiment).group(1))
-        
-        # ML model prediction
-        try:
-            ml_sentiment = predict_sentiment_ml(clean_text)
-            ml_score_match = re.search(r'\(([-+]?\d+\.\d+)\)', ml_sentiment)
-            ml_score = float(ml_score_match.group(1)) if ml_score_match else 0.0
-            
-            # Convert categorical to numerical (-1 to 1 scale)
-            if "Positive" in ml_sentiment:
-                ml_score = abs(ml_score)
-            elif "Negative" in ml_sentiment:
-                ml_score = -abs(ml_score)
-            else:
-                ml_score = 0.0
-        except:
-            # If ML prediction fails
-            ml_score = 0.0
-        
-        # Emoji analysis
-        emoji_score = analyze_emoji_sentiment(processed['emojis'])
-        
-        # TikTok lexicon analysis
-        lexicon_score = analyze_lexicon_sentiment(text)
-        
-        # Weight the scores
-        weights = {
-            'vader': 0.4,   # VADER is reliable for social media
-            'ml': 0.3,      # ML model captures patterns
-            'emoji': 0.15,  # Emojis are important in TikTok
-            'lexicon': 0.15 # TikTok-specific language
-        }
-        
-        # Calculate weighted ensemble score
-        final_score = (
-            vader_score * weights['vader'] +
-            ml_score * weights['ml'] +
-            emoji_score * weights['emoji'] +
-            lexicon_score * weights['lexicon']
-        )
-        
-        # Determine sentiment category
-        if final_score >= 0.05:
-            results.append(f"Positive ({final_score:.2f})")
-        elif final_score <= -0.05:
-            results.append(f"Negative ({final_score:.2f})")
+        # Parse the MNB result to get category and confidence
+        mnb_match = re.match(r"(Positive|Negative|Neutral) \(([-+]?\d+\.\d+)\)", mnb_sentiment)
+        if mnb_match:
+            mnb_category = mnb_match.group(1)
+            mnb_confidence = float(mnb_match.group(2))
         else:
-            results.append(f"Neutral ({final_score:.2f})")
+            # If parsing fails, default to neutral
+            mnb_category = "Neutral"
+            mnb_confidence = 0.5
+        
+        # Only make adjustments in specific cases:
+        # 1. When confidence is relatively low (borderline cases)
+        # 2. When strong signals from emojis or lexicon contradict MNB
+        
+        # Check for strong emoji signals
+        emoji_score = 0
+        if processed['emojis']:
+            emoji_score = analyze_emoji_sentiment(processed['emojis'])
+        
+        # Check for strong lexicon signals based on detected language
+        lexicon_score = analyze_lexicon_sentiment(text, language)
+        
+        # Determine if we need to adjust the MNB result
+        make_adjustment = False
+        
+        # Case 1: Low confidence from MNB (borderline case)
+        if mnb_confidence < 0.65:
+            make_adjustment = True
+        
+        # Case 2: Strong contradictory signals from emojis
+        if abs(emoji_score) > 0.7:
+            if (mnb_category == "Positive" and emoji_score < -0.5) or \
+               (mnb_category == "Negative" and emoji_score > 0.5):
+                make_adjustment = True
+        
+        # Case 3: Strong contradictory signals from lexicon
+        if abs(lexicon_score) > 0.7:
+            if (mnb_category == "Positive" and lexicon_score < -0.5) or \
+               (mnb_category == "Negative" and lexicon_score > 0.5):
+                make_adjustment = True
+        
+        # Make adjustments if needed, otherwise return MNB result as is
+        if make_adjustment:
+            # Calculate adjusted score
+            weights = {
+                'mnb': 0.8,       # MNB still gets majority weight
+                'emoji': 0.1,     # Small contribution from emojis
+                'lexicon': 0.1    # Small contribution from lexicon
+            }
+            
+            # Convert mnb_category to score for weighted calculation
+            if mnb_category == "Positive":
+                mnb_score = mnb_confidence
+            elif mnb_category == "Negative":
+                mnb_score = -mnb_confidence
+            else:
+                mnb_score = 0.0
+            
+            # Calculate weighted final score
+            final_score = (
+                mnb_score * weights['mnb'] +
+                emoji_score * weights['emoji'] +
+                lexicon_score * weights['lexicon']
+            )
+            
+            # Determine sentiment category
+            if final_score >= 0.05:
+                results.append(f"Positive ({final_score:.2f})")
+            elif final_score <= -0.05:
+                results.append(f"Negative ({final_score:.2f})")
+            else:
+                results.append(f"Neutral ({final_score:.2f})")
+        else:
+            # Use original MNB result
+            results.append(mnb_sentiment)
     
     if single_input:
         return results[0]

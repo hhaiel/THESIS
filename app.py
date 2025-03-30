@@ -40,6 +40,7 @@ import io
 import csv
 import chardet  # You may need to pip install chardet
 
+
 troll_detector = TrollDetector()
 
 
@@ -757,12 +758,20 @@ elif page == "Upload Data":
                         
                         # Append to CSV if it exists, create if it doesn't
                         try:
-                            existing_corrections = pd.read_csv('sentiment_corrections.csv')
+                            data_dir = os.path.join(os.path.dirname(__file__), 'data')
+                            csv_path = os.path.join(data_dir, 'sentiment_corrections.csv')
+                            existing_corrections = pd.read_csv(csv_path)
                             correction_data = pd.concat([existing_corrections, correction_data])
                         except:
                             pass
                         
-                        correction_data.to_csv('sentiment_corrections.csv', index=False)
+                        # Create a data directory if it doesn't exist
+                            data_dir = os.path.join(os.path.dirname(__file__), 'data')
+                            os.makedirs(data_dir, exist_ok=True)
+
+                            # Save the file in the data directory
+                            csv_path = os.path.join(data_dir, 'sentiment_corrections.csv')
+                            correction_data.to_csv(csv_path, index=False)
                         st.success(f"Comment sentiment corrected to {corrected_sentiment} and saved for future training.")
                     
                     # Add language detection information
@@ -1031,42 +1040,7 @@ elif page == "Fetch TikTok Comments":
                             mime="text/csv",
                         )
                         
-                        # Sentiment Correction Feature
-                        st.subheader("Sentiment Correction")
-                        st.write("Select comments to manually correct their sentiment labels:")
-                            
-                        # Let user select a comment
-                        selected_comment_idx = st.selectbox("Select comment to relabel:", 
-                                                           options=comments_df.index.tolist(),
-                                                           format_func=lambda x: comments_df.loc[x, 'Comment'][:50] + "...")
 
-                        # Show current sentiment
-                        current_sentiment = comments_df.loc[selected_comment_idx, 'Enhanced Sentiment']
-                        st.write(f"Current sentiment: {current_sentiment}")
-
-                        # Let user choose new sentiment
-                        corrected_sentiment = st.radio("Correct sentiment:", 
-                                                      options=["Positive", "Neutral", "Negative"])
-
-                        if st.button("Save Correction"):
-                            # Save the corrected sentiment with a confidence of 1.0 (manual label)
-                            comments_df.loc[selected_comment_idx, 'Enhanced Sentiment'] = f"{corrected_sentiment} (1.00)"
-                            
-                            # Save to a corrections file for future model training
-                            correction_data = pd.DataFrame({
-                                'Comment': [comments_df.loc[selected_comment_idx, 'Comment']],
-                                'Corrected_Sentiment': [corrected_sentiment]
-                            })
-                            
-                            # Append to CSV if it exists, create if it doesn't
-                            try:
-                                existing_corrections = pd.read_csv('sentiment_corrections.csv')
-                                correction_data = pd.concat([existing_corrections, correction_data])
-                            except:
-                                pass
-                            
-                            correction_data.to_csv('sentiment_corrections.csv', index=False)
-                            st.success(f"Comment sentiment corrected to {corrected_sentiment} and saved for future training.")
                         
                         # Add language detection information
                         st.subheader("Language Information")
