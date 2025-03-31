@@ -36,64 +36,173 @@ TAGALOG_LEXICON = {
         'bongga': 0.8, 'astig': 0.7, 'asik': 0.6, 'solid': 0.7, 'bet': 0.5,
         'ang galing': 0.9, 'ang ganda': 0.9, 'napakahusay': 0.9, 'lubos': 0.7,
         'salamat': 0.6, 'maraming salamat': 0.8, 'panalo': 0.8, 'ayos': 0.6,
+        'nakaka-proud': 0.8, 'kahanga-hanga': 0.9, 'napakasaya': 0.9, 'nakakatuwa': 0.7,
+        'nakakagaan ng loob': 0.8, 'nakakagana': 0.7, 'nakaka-inspire': 0.8, 'walang katulad': 0.8,
+        'hinangaan': 0.7, 'pinapansin': 0.6, 'kinagigiliwan': 0.8, 'pinupuri': 0.8,
+        'hinahangaan': 0.8, 'kinikilig': 0.8, 'kinagalakan': 0.7, 'pinapahalagahan': 0.7,
         
         # Moderately positive words
         'mabait': 0.5, 'maayos': 0.5, 'masayang': 0.6, 'masaganang': 0.6, 
         'tama': 0.4, 'tumpak': 0.4, 'swak': 0.5, 'pasado': 0.5, 'ok': 0.3,
         'okay': 0.3, 'makatotohanan': 0.4, 'matulungin': 0.5, 'marangal': 0.6,
         'paborito': 0.6, 'gusto ko': 0.6, 'magalang': 0.5, 'masigla': 0.5,
+        'nakakagaan': 0.5, 'keri': 0.4, 'pwedeng pwede': 0.5, 'ayos lang': 0.4,
+        'magandang araw': 0.5, 'maligayang bati': 0.6, 'mabuhay': 0.6, 'makakaraos': 0.5,
+        'hindi masama': 0.4, 'kaaya-aya': 0.6, 'nakakagalak': 0.6, 'masaganang buhay': 0.6,
+        'masuwerte': 0.6, 'pagpalain': 0.6, 'maginhawa': 0.5, 'makakapasa': 0.5,
         
         # Slightly positive words
         'sige': 0.2, 'pwede': 0.2, 'puwede': 0.2, 'totoo': 0.3, 'payag': 0.3,
         'pwede na': 0.2, 'sakto': 0.3, 'goods': 0.3, 'good': 0.3, 'kasya': 0.2,
+        'nakakaintindi': 0.3, 'maiintindihan': 0.3, 'naiintindihan': 0.3, 'pagsang-ayon': 0.3,
+        'tanggap': 0.3, 'tinatanggap': 0.3, 'sasang-ayon': 0.2, 'papayag': 0.2,
+        'pagkakasundo': 0.3, 'nasa ayos': 0.2, 'makakapagpatuloy': 0.3, 'mabagal man': 0.1,
+        'matutunan': 0.3, 'matututunan': 0.3, 'masusubukan': 0.3, 'susubukin': 0.2,
         
         # Neutral words
         'siguro': 0.0, 'baka': 0.0, 'marahil': 0.0, 'medyo': 0.0, 'pwede na rin': 0.0,
         'ganun': 0.0, 'ganyan': 0.0, 'bahala': 0.0, 'ewan': 0.0, 'ewan ko': 0.0,
-        'di ko alam': 0.0, 'hindi ko alam': 0.0,
+        'di ko alam': 0.0, 'hindi ko alam': 0.0, 'baka naman': 0.0, 'kung sakali': 0.0,
+        'depende': 0.0, 'nakadepende': 0.0, 'malay mo': 0.0, 'malay natin': 0.0,
+        'hindi ko pa alam': 0.0, 'di pa sure': 0.0, 'tignan natin': 0.0, 'tingnan muna': 0.0,
+        'wala pang kasiguraduhan': 0.0, 'wala pa akong masabi': 0.0, 'walang komento': 0.0,
+        'walang maisip': 0.0, 'walang masabi': 0.0, 'walang ideya': 0.0, 'wala akong alam': 0.0,
+        'mamaya na': 0.0, 'sa susunod': 0.0, 'kapag may oras': 0.0, 'sa ibang pagkakataon': 0.0,
         
         # Slightly negative words
         'hindi maganda': -0.3, 'hindi mabuti': -0.3, 'hindi masarap': -0.3,
         'ayaw': -0.3, 'ayaw ko': -0.4, 'mali': -0.3, 'di tama': -0.3,
         'kulang': -0.2, 'medyo pangit': -0.2, 'sana': -0.1, 'sayang': -0.3,
+        'medyo masakit': -0.3, 'nakakalungkot': -0.3, 'nakakasama ng loob': -0.3,
+        'hindi kasiya-siya': -0.3, 'nakakabagot': -0.2, 'nakakainip': -0.2,
+        'hindi ko gusto': -0.3, 'hindi ko trip': -0.3, 'di ko bet': -0.3, 'di ko type': -0.3,
+        'parang hindi tama': -0.2, 'parang may mali': -0.2, 'may pagkukulang': -0.3, 
+        'kinukulang': -0.3, 'may kakulangan': -0.3, 'hindi pa sapat': -0.2,
         
         # Moderately negative words
         'pangit': -0.5, 'masama': -0.5, 'bulok': -0.6, 'panget': -0.5, 'malungkot': -0.5,
         'nakakabadtrip': -0.6, 'badtrip': -0.5, 'nakakainis': -0.5, 'kalungkutan': -0.5,
         'palpak': -0.6, 'walang kwenta': -0.6, 'walang kuwenta': -0.6, 'sablay': -0.5,
         'di gusto': -0.5, 'hindi gusto': -0.5, 'hindi ko gusto': -0.6, 'di ko gusto': -0.6,
+        'kainis': -0.5, 'nakakabuwis-buhay': -0.6, 'nakakatamad': -0.5, 'nakakasawa': -0.5,
+        'nakakaumay': -0.5, 'nakakayamot': -0.5, 'nakakasira ng araw': -0.6, 'nakakasama ng loob': -0.6,
+        'nakakagalit': -0.6, 'nakakabagabag': -0.5, 'nakakakaba': -0.5, 'kabaliwan': -0.6,
+        'kabobohan': -0.6, 'kacheapan': -0.5, 'kawalang hiya': -0.6, 'kasamaan': -0.6,
+        'kasalanan': -0.5, 'katamaran': -0.5, 'kapabayaan': -0.5, 'kawalan ng respeto': -0.6,
         
         # Highly negative words
         'napakasama': -0.9, 'kasuklam-suklam': -0.9, 'nakakagalit': -0.8, 'nakakainis': -0.7,
         'napaka-sama': -0.9, 'sobrang pangit': -0.9, 'sobrang panget': -0.9, 'basura': -0.8,
         'walang kwentang': -0.8, 'walang kuwentang': -0.8, 'nakakayamot': -0.7,
         'kakahiya': -0.7, 'nakakahiya': -0.7, 'napakasamang': -0.9, 'pekeng': -0.7,
-        'scam': -0.8, 'nakakabuwisit': -0.8, 'napakababa': -0.7, 'sobrang sama': -0.9
-    }
+        'scam': -0.8, 'nakakabuwisit': -0.8, 'napakababa': -0.7, 'sobrang sama': -0.9,
+        'katanga': -0.8, 'tanga': -0.8, 'hindi ko na alam': -0.6,
+        'nakakabaliw': -0.8, 'nakakapanlumo': -0.8, 'nakakabagabag': -0.7, 'nakakabalisa': -0.7,
+        'nakakasuka': -0.9, 'nakakaduwal': -0.9, 'nakakadiri': -0.8, 'nakakasama ng ugali': -0.8,
+        'napakababa ng uri': -0.8, 'napaka-walang hiya': -0.9, 'napaka-walang galang': -0.8,
+        'napaka-walang respeto': -0.8, 'walang pakundangan': -0.8, 'walang pakundangan sa tao': -0.9,
+        'walang konsiderasyon': -0.7, 'walang awa': -0.8, 'walang puso': -0.8,
+        'walang kaluluwa': -0.8, 'walang pagmamahal': -0.7, 'walang pagsisisi': -0.7,
 
-    # Tagalog TikTok-specific slang and expressions
-TAGALOG_TIKTOK_LEXICON = {
-        # Positive TikTok Tagalog slang
-        'angat': 0.7, 'pak': 0.7, 'pak ganern': 0.8, 'lodi': 0.7, 'petmalu': 0.7,
-        'awra': 0.6, 'shookt': 0.5, 'labyu': 0.7, 'labs': 0.6, 'poging': 0.7, 
-        'gandang': 0.7, 'sana all': 0.5, 'sanaol': 0.5, 'lit': 0.6, 'apaka ganda': 0.8,
-        'keri': 0.5, 'angas': 0.7, 'witty': 0.6, 'kyot': 0.6, 'kyut': 0.6, 'naurrr': 0.6,
-        'peri true': 0.5, 'trulalu': 0.5, 'deserve': 0.5, 'slayyy': 0.8, 'slayyyy': 0.8,
+        # Additional highly negative words
+        'bobo': -0.8, 'engot': -0.8, 'inutil': -0.8, 'gago': -0.8, 'gaga': -0.8,
+        'ulol': -0.8, 'tae': -0.7, 'bulok': -0.7, 'walang silbi': -0.8, 'ewan ko sayo': -0.6,
+        'bwiset': -0.7, 'bwisit': -0.7, 'hayop': -0.7, 'hayup': -0.7, 'putangina': -0.9,
+        'punyeta': -0.8, 'lintik': -0.7, 'leche': -0.7, 'peste': -0.7, 'kupal': -0.8,
+        'gunggong': -0.8, 'hangal': -0.7, 'ungas': -0.8, 'ugok': -0.7, 'abnormal': -0.7,
+        'sira ulo': -0.8, 'baliw': -0.7, 'sinungaling': -0.7, 'balimbing': -0.6,
+        'traydor': -0.7, 'duwag': -0.7, 'makasarili': -0.7, 'ganid': -0.7,
+        'malandi': -0.7, 'pokpok': -0.8, 'manyakis': -0.8, 'bastos': -0.7,
+        'walang hiya': -0.8, 'walang modo': -0.7, 'tamad': -0.6, 'pabaya': -0.6,
+        'mabaho': -0.6, 'maasim': -0.6, 'maitim': -0.6, 'pangit na ugali': -0.7,
+        'madamot': -0.7, 'walang utang na loob': -0.8, 'makapal ang mukha': -0.7,
+        'masakit sa ulo': -0.6, 'sakit sa ulo': -0.7, 'sakit sa puso': -0.7,
+        'nakakabaliw': -0.7, 'nakakasuka': -0.8, 'nakakaumay': -0.7, 'nakakawalang gana': -0.7,
+        'kadiri': -0.7, 'kasuklam': -0.8, 'kaawa-awa': -0.6, 'kahiya-hiya': -0.7,
+        'kainis': -0.7, 'kabwiset': -0.7, 'kaloka': -0.6,
+        'hindot': -0.9, 'kingina': -0.9, 'tang ina': -0.9, 'tarantado': -0.8, 'taragis': -0.8,
+        'hinayupak': -0.8, 'hudas': -0.7, 'demonyo': -0.8, 'satanas': -0.8, 'impakto': -0.7,
+        'impaktita': -0.7, 'walanghiya': -0.8, 'salot': -0.8, 'salbahe': -0.7, 'masamang damo': -0.7,
+        'halimaw': -0.7, 'manloloko': -0.7, 'mandaraya': -0.7, 'bayaran': -0.7, 'balahura': -0.7,
+        'taeng aso': -0.8, 'dedma': -0.6, 'buraot': -0.7, 'bruha': -0.7, 'etchos': -0.6,
+        'eklavung': -0.7, 'eklabu': -0.7, 'ek-ek': -0.6, 'bolok': -0.7, 'bulag': -0.6,
+        'bingi': -0.6, 'pipi': -0.6, 'walang utak': -0.8, 'walang bait': -0.8, 'walang isip': -0.8,
+
+        # Common sarcastic phrases
+        'wow ang galing': -0.7, 'talino talaga': -0.7, 'galing mo dyan': -0.6,
+        'napakatalino mo': -0.7, 'ang husay mo talaga': -0.7, 'ang talino naman': -0.6,
+        'sige nga': -0.5, 'matalino ka': -0.6, 'hanga ako sayo': -0.6,
+        'bongga ka day': -0.6, 'naku po': -0.6, 'jusko po': -0.6,
+        'ay wow': -0.6, 'edi wow': -0.7, 'ikaw na': -0.6, 'idol na kita': -0.6,
+        'ang galing mo talaga': -0.7, 'genius ka talaga': -0.7, 'napakahusay': -0.7,
+        'ang bright mo naman': -0.7, 'eh di ikaw na matalino': -0.8, 'ikaw na ang magaling': -0.7,
+        'edi ikaw na': -0.7, 'apir naman dyan': -0.6, 'bow ako sayo': -0.6, 'nakakaproud ka': -0.6,
+        'nakakatuwa ka naman': -0.6, 'proud na proud ako sayo': -0.7, 'saludo ako sayo': -0.6,
+        'grabe ang talino': -0.7, 'ang laki ng utak': -0.6, 'grabe ang galing': -0.7,
+        'nosebleed sa galing': -0.7, 'napakagaling mo talaga': -0.7, 'genius yarn': -0.7,
+        'matalino yarn': -0.6, 'ang talino naman nito': -0.6, 'wow may nagsalita': -0.7,
+        'edi ikaw na ang the best': -0.7, 'edi wow congrats': -0.7, 'bravo naman sayo': -0.6,
+        'wow clap clap': -0.6, 'grabe naman ang galing': -0.7, 'nakakabilib talaga': -0.6,
+        'medal ka dyan': -0.6, 'edi pabuhat kami sayo': -0.7, 'grabe ang husay ha': -0.7,
+        'walang sinabi ang einstein sayo': -0.8, 'mas magaling ka pa kay einstein': -0.8,
+        'i-nominate kita sa nobel prize': -0.7, 'prof ka ba': -0.6, 'master mo talaga to': -0.6,
+        'expert ka dito ah': -0.6, 'sobrang dami mong alam': -0.7,
         
-        # Neutral TikTok Tagalog slang
-        'mhie': 0.0, 'bhie': 0.0, 'mars': 0.0, 'accla': 0.0, 'teh': 0.0,
-        'sis': 0.0, 'dzai': 0.0, 'ghorl': 0.0, 'mumsh': 0.0, 'siz': 0.0,
-        'charot': 0.0, 'charr': 0.0, 'char': 0.0, 'skl': 0.0, 'emz': 0.0,
-        'borde': 0.0, 'forda': 0.0, 'ferson': 0.0, 'fordalinis': 0.0,
-        'mema': -0.1, 'skeri': 0.0, 'aminin': 0.0, 'pov': 0.0,
+        # Additional positive expressions
+        'mabuhay': 0.8, 'mabuhay ka': 0.8, 'pinagpala': 0.7, 'pagpalain ka': 0.8,
+        'pagpalain ka ng Diyos': 0.9, 'Diyos na mahabagin': 0.8, 'mahal kita': 0.9,
+        'love kita': 0.9, 'mahal na mahal kita': 0.9, 'sobrang mahal kita': 0.9,
+        'mahal na mahal': 0.9, 'pinakamamahal': 0.9, 'iginagalang': 0.8, 'nirerespeto': 0.8,
+        'ginagalang': 0.8, 'minamahal': 0.9, 'pinahahalagahan': 0.8, 'pinahahalagahan kita': 0.8,
+        'ikaw ang pinakamagaling': 0.9, 'ikaw ang pinakamahusay': 0.9, 'ikaw ang the best': 0.9,
+        'ikaw ang nangunguna': 0.8, 'ikaw ang number one': 0.8, 'may pag-asa': 0.7,
+        'may pag-asa pa': 0.7, 'walang imposible': 0.8, 'kaya mo yan': 0.8, 'kaya natin to': 0.8,
         
-        # Negative TikTok Tagalog slang
-        'edi wow': -0.5, 'eww': -0.6, 'kadiri': -0.7, 'yuck': -0.6, 'cringe': -0.5,
-        'tanga': -0.7, 'bobo': -0.7, 'chaka': -0.6, 'dami satsat': -0.5, 'nochuchuchu': -0.5,
-        'ekis': -0.6, 'baduy': -0.5, 'ampanget': -0.7, 'irita': -0.6, 'iyakin': -0.5,
-        'bakla ka': -0.4, 'inggit': -0.5, 'flop': -0.6, 'ginamit lang': -0.6,
-        'plastik': -0.7, 'feeling': -0.5, 'feeling close': -0.6
-    }
+        # Additional negative expressions
+        'walang pag-asa': -0.8, 'wala nang pag-asa': -0.9, 'hopeless': -0.8, 'imposible': -0.7,
+        'hindi mo kaya': -0.7, 'hindi natin kaya': -0.7, 'sumuko na': -0.8, 'give up na': -0.8,
+        'i-surrender na': -0.8, 'wala nang magagawa': -0.8, 'hindi na mababago': -0.7,
+        'wala nang remedy': -0.8, 'wala nang lunas': -0.8, 'hopeless case': -0.8,
+        'malala na': -0.7, 'walang solusyon': -0.7, 'hindi na masosolusyunan': -0.8,
+        'wala nang paraan': -0.8, 'walang paraang maisip': -0.7, 'walang exit strategy': -0.7,
+        'wala nang kawala': -0.8, 'nakasukol': -0.7, 'nakakulong': -0.7, 'nakapiit': -0.7,
+        'nakahuli': -0.7, 'nahuhuli': -0.7, 'nakakahon': -0.7, 'wala nang magagawa': -0.8,
+        'hindi na mababago': -0.8, 'wala nang pupuntahan': -0.8, 'walang patutunguhan': -0.8,
+        
+        # Social media specific positive expressions
+        'apir': 0.7, 'apir tayo': 0.7, 'petmalu': 0.8, 'lodi': 0.8, 'idol': 0.8,
+        'labs': 0.7, 'labs kita': 0.8, 'labyu': 0.8, 'vareh': 0.6, 'pars': 0.6,
+        'beshie': 0.6, 'bes': 0.6, 'beshy': 0.6, 'teh': 0.5, 'mars': 0.6,
+        'mumsh': 0.6, 'mamsh': 0.6, 'sisteret': 0.6, 'bruder': 0.6, 'sis': 0.6,
+        'siz': 0.6, 'bro': 0.6, 'chika': 0.5, 'chiks': 0.5, 'chika tayo': 0.5,
+        'solid': 0.7, 'solido': 0.7, 'shelemet': 0.7, 'tenkyuuu': 0.7,
+        'tenks': 0.6, 'tanks': 0.6, 'labmuch': 0.8, 'naol': 0.7, 'sanaol': 0.7,
+        'omg': 0.7, 'OMG': 0.7, 'angas': 0.7, 'ansaveh': 0.7, 'werpa': 0.7,
+
+        # Mixed sentiment patterns (positive then negative)
+        'maganda pero': 0.2,  # "beautiful but" - starts positive but likely ends negative
+        'maganda kaso': 0.1,  # "beautiful however" - stronger negative connotation after positive
+        'maganda sana kaso': 0.0,  # "would have been beautiful but" - neutralizes positive
+        'maganda sana kung hindi': -0.1,  # "would have been beautiful if not for" - slightly negative
+        'masarap pero': 0.2,  # "delicious but" - starts positive but has caveat
+        'masarap sana kung': 0.1,  # "would be delicious if" - conditional positive
+        'ok naman pero': 0.0,  # "it's okay but" - neutral with negative tendency
+        'mabait pero': 0.2,  # "nice but" - positive with reservation
+        'magaling kaso': 0.2,  # "good at it but" - qualified positive
+        'mahusay sana pero': 0.1,  # "would have been excellent but" - diminished positive
+
+        # Mixed sentiment patterns (negative then positive)
+        'pangit pero': -0.2,  # "ugly but" - starts negative but may end positive
+        'masama pero': -0.2,  # "bad but" - negative with possible redemption
+        'nakakabadtrip pero': -0.3,  # "annoying but" - negative with some positive
+        'nakakainis pero': -0.3,  # "irritating but" - negative first impression but potential positive
+        'bulok pero': -0.3,  # "rotten but" - strong negative with possible exception
+        'hindi maganda pero': -0.2,  # "not beautiful but" - negative with positive possibility
+        'ayaw ko pero': -0.3,  # "I don't like it but" - personal negative with potential positive
+        'mali pero': -0.2,  # "wrong but" - negative with potential learning
+        'hindi ko gusto pero': -0.3,  # "I don't like it but" - strong dislike with exception
+        'disappointed pero': -0.4,  # "disappointed but" - stronger negative with minor positive
+}
 
 def is_tagalog(text):
         """
@@ -133,7 +242,7 @@ def is_tagalog(text):
 
 def analyze_tagalog_lexicon_sentiment(text):
         """
-        Analyze sentiment using Tagalog lexicon.
+        Analyze sentiment using Tagalog lexicon with enhanced sarcasm detection.
         
         Args:
             text (str): Text to analyze
@@ -158,19 +267,33 @@ def analyze_tagalog_lexicon_sentiment(text):
         # Combine all possible matches
         all_possible_matches = words + bigrams + trigrams
         
+        # Check for sarcasm indicators
+        sarcasm_detected = False
+        positive_terms = set(['galing', 'husay', 'talino', 'wow', 'magaling', 'idol', 'sana all'])
+        negative_terms = set(['tanga', 'bobo', 'pangit', 'hindi', 'bulok', 'ulol', 'gago'])
+        
+        # If text has both positive and negative terms, might be sarcastic
+        has_positive = any(term in text for term in positive_terms)
+        has_negative = any(term in text for term in negative_terms)
+        
+        # Sarcasm often starts with a positive statement followed by negative
+        positive_at_start = any(text.startswith(term) for term in ['ang galing', 'wow', 'grabe', 'husay'])
+        
+        # Detect sarcasm patterns
+        if (has_positive and has_negative) or positive_at_start:
+            sarcasm_detected = True
+        
         total_score = 0
         count = 0
         
-        # Check in general Tagalog lexicon
+        # Check in Tagalog lexicon (both regular and TikTok terms are included here)
         for item in all_possible_matches:
             if item in TAGALOG_LEXICON:
-                total_score += TAGALOG_LEXICON[item]
-                count += 1
-        
-        # Check in TikTok-specific lexicon
-        for item in all_possible_matches:
-            if item in TAGALOG_TIKTOK_LEXICON:
-                total_score += TAGALOG_TIKTOK_LEXICON[item]
+                score = TAGALOG_LEXICON[item]
+                # If sarcasm is detected, reverse the score for positive terms
+                if sarcasm_detected and score > 0:
+                    score = -score
+                total_score += score
                 count += 1
         
         # If no sentiment words were found

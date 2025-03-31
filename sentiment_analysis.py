@@ -159,10 +159,10 @@ TIKTOK_LEXICON = {
 }
 FILIPINO_LEXICON = {
     # Positive Filipino/Taglish words
-    'ganda': 0.7, 'astig': 0.8, 'galing': 0.8, 'maganda': 0.7,
-    'husay': 0.7, 'ang galing': 0.8, 'ang cute': 0.7, 'ang ganda': 0.8,
-    'idol': 0.7, 'petmalu': 0.8, 'lodi': 0.7, 'solid': 0.7, 'lupet': 0.8,
-    'panalo': 0.8, 'sana all': 0.6, 'nakakatuwa': 0.7, 'bongga': 0.7,
+    'ganda': 0.5, 'astig': 0.5, 'galing': 0.5, 'maganda': 0.5,
+    'husay': 0.5, 'ang galing': 0.5, 'ang cute': 0.5, 'ang ganda': 0.5,
+    'idol': 0.5, 'petmalu': 0.5, 'lodi': 0.7, 'solid': 0.5, 'lupet': 0.5,
+    'panalo': 0.5, 'sana all': 0.5, 'nakakatuwa': 0.5, 'bongga': 0.5,
     
     # Negative Filipino/Taglish words
     'panget': -0.7, 'pangit': -0.7, 'chaka': -0.7, 'nakakabwisit': -0.8,
