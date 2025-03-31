@@ -130,7 +130,64 @@ TIKTOK_LEXICON = {
     'disappointing': -0.7, 'trash': -0.8, 'nightmare': -0.7, 'unfollow': -0.6, 'worst': -0.8,
     'shadowban': -0.7, 'shadow ban': -0.7, 'triggered': -0.5, 'cancelled': -0.7,
     'flopped': -0.8, 'overrated': -0.6, 'boring': -0.6, 'annoying': -0.7, 'wtf': -0.6,
-    
+    'ang mahal': -0.8, 'ndi sha affordable': -0.8, 'ndi pang masa': -0.7, 
+    'di ko afford as a student': -0.8, 'ang liit ng mga size nila': -0.6, 
+    'I don\'t find gvn good quality, their products feel flimsy': -0.8, 
+    'hindi size inclusive': -0.7, 'that\'s the ugliest shorts I\'ve ever see': -0.9, 
+    'walang plus size': -0.7, 'hindi affordable': -0.8, 'AMPANGET': -0.9, 
+    'creepy': -0.7, 'parang uod': -0.6, 'di ko bet lasa': -0.6, 
+    'stuck na sa 99%': -0.7, 'namamatay na sya': -0.8, 'super tagal magblend': -0.8, 
+    'waste our money': -0.9, 'cheap product': -0.7, 'cheap ng mga product': -0.7, 
+    'ang dugyot gamitin': -0.8, 'panget nga yung product': -0.8, 'ang asim': -0.6, 
+    'ang greasy and cakey': -0.7, 'hirap tlaga siyang i blend': -0.7, 
+    'nakakaubos ng pasensya': -0.7, 'it looks cheap to me': -0.6, 
+    'rip/hole on the leather': -0.8, 'nag tarnish': -0.7, 'deinfluenced me': -0.7, 
+    'nasira din takip ko': -0.8, 'madali mabasag': -0.7, 'pass': -0.6, 
+    'nakaka disappoint': -0.7, 'go give us nothing': -0.8, 'auto pass': -0.7, 
+    'low quality talaga': -0.9, 'its not worth the hype': -0.8, 'ayaw ko yan': -0.7, 
+    'tinipid yung ingredients': -0.7, 'Wala namang silbi': -0.8, 
+    'mabilis malowbat': -0.7, 'walang kwenta': -0.8, 'ang init din ng buga': -0.6, 
+    'such a waste of money': -0.9, 'ang hina': -0.7, 'sayang pera': -0.8, 
+    'may mga defect': -0.8, 'negats': -0.7, 'himulmul na tapos kupas pa': -0.8, 
+    'low qual': -0.8, 'trash outfits': -0.9, 'di ko bet yung akin': -0.6, 
+    'sticky and uncomfortable': -0.7, '5/10 quality': -0.5, 'ang mahal nya': -0.8, 
+    'hindi sya perfect price for students': -0.7, 'underwhelming ng launch': -0.7, 
+    'Panget ng packaging': -0.7, 'soo expensive and hard to get': -0.8, 
+    'sauces are bland': -0.6, 'DI NAMN GAYAN SERVING NILA ANG ONTI': -0.7, 
+    'HINDI WORTH IT': -0.8, 'maasim': -0.6, 'so overpriced for no reason': -0.8, 
+    'bad review': -0.7, 'hirap iblend': -0.7, 'anti-budol talaga': -0.7, 
+    'so consistent disappointing us': -0.8, 'hindi nabblend': -0.7, 
+    'Parang stamp ang peg': -0.6, 'i also dont like their sunscreen stick': -0.7, 
+    'ang oily': -0.6, 'price is not pricing': -0.7, 'unreasonably pricey': -0.8, 
+    'hard to use': -0.7, 'Not worth it': -0.8, 'i will not spend 599 pesos for that inconvenience': -0.8, 
+    'ang hirap ijustify': -0.7, 'kakaiba talaga siya': -0.6, 'PALPAK': -0.8, 
+    'Super hassle': -0.7, 'hirap niyang i pag-tanggol': -0.7, 'Ang panget talaga jusko': -0.9, 
+    'overpriced local products': -0.8, 'not textured skin friendly': -0.7, 
+    'cheaper option na mas better': 0.7, 'Waste of money': -0.9, 'Total flop': -0.9, 
+    'sayang ang money': -0.8, 'defective': -0.9, 'nagleleak siya': -0.8, 
+    'bumabaho pag paubos na': -0.8, 'drying siya': -0.7, 'hnde gaanong mabango': -0.6, 
+    'skin got irritated': -0.9, 'di siya fda approve': -0.9, 'daming negative effects': -0.9, 
+    'napa utot ako sa presyo': -0.8, 'sisi ako na bumili ako': -0.7, 'sayang': -0.7, 
+    'Nabudol me': -0.8, 'so so disappointed': -0.8, 'they\'re quite overrated': -0.7, 
+    'overhyped and not good at all': -0.8, 'wasted money': -0.9, 'ang bilis matanggal': -0.7, 
+    'nagdadry pa kaagad': -0.7, 'blush is not blushing': -0.7, 'nawala yung blush agad': -0.8, 
+    'Formula\'s not for me': -0.6, 'sobrang cakey': -0.7, 'oily na': -0.7, 
+    'ang sakit sa paa': -0.8, 'feels expensive': -0.7, 'crease and cake': -0.7, 
+    'di sulit': -0.7, 'nagbreak out ako': -0.9, 'super kati na ng mukha ko': -0.9, 
+    'tinapon ko nalang': -0.8, 'Parang basahan': -0.7, 'ANG MAHAL NMN KASI': -0.8, 
+    'd keri as student': -0.7, 'it\'s pricey': -0.7, 'bad quality': -0.8, 
+    'paiba-iba kasi ung formulation': -0.7, 'ripoff brand': -0.8, 'napamura ako sa presyo': -0.8, 
+    'not friendly sa mga morena': -0.7, 'grabeee din presyo teh': -0.8, 'too yellow': -0.6, 
+    'super liit': -0.7, 'DI MASARAP': -0.8, 'expectation vs reality talaga': -0.7, 
+    'di na kami umulit': -0.8, 'SO LIIT': -0.7, 'di sulit napakaliit': -0.8, 
+    'not giving talaga': -0.7, 'ang nipis': -0.6, 'ang lungkot po': -0.7, 
+    'most disappointing meal': -0.9, 'not impressive': -0.7, 'deceiving ad': -0.8, 
+    'small serving': -0.7, 'di naman ganyan kalaki': -0.7, 'mid ahh food': -0.6, 
+    'so maliit not worth it': -0.8, 'it\'s a no': -0.7, 'it is so bland': -0.7, 
+    'not good, tried it': -0.8, 'pangit ng lasa': -0.8, 'super slow ng internet': -0.8, 
+    'hindi consistent yung signal': -0.7, 'super hina na ng signal': -0.8, 'mabagal': -0.7, 
+    'slow internet': -0.7, 'downfall': -0.9, 'cancelled': -0.9, 'never improve': -0.8, 
+    'mag breakout po ang face': -0.9,
     
     # Negative product-specific terms
     'defective': -0.8, 'sira': -0.8, 'broken': -0.8, 'not working': -0.8, 
@@ -155,7 +212,9 @@ TIKTOK_LEXICON = {
     'authentic': 0.7, 'original': 0.7, 'recommended': 0.7, 'mura': 0.6, 'affordable': 0.6,
     'fast delivery': 0.7, 'mabilis dumating': 0.7, 'responsive seller': 0.7,
     'generous seller': 0.7, 'exceeded expectations': 0.8, 'free gift': 0.6,
-    'good packaging': 0.6, 'secure packaging': 0.6, 'well packed': 0.6
+    'good packaging': 0.6, 'secure packaging': 0.6, 'well packed': 0.6,
+
+
 }
 FILIPINO_LEXICON = {
     # Positive Filipino/Taglish words
@@ -623,7 +682,7 @@ def train_with_labeled_data():
     """
     try:
         # Try to load labeled data
-        labeled_data = pd.read_csv('trained_data.csv')
+        labeled_data = pd.read_csv('trained_data.csv', encoding='utf-8', on_bad_lines='skip')
         
         if len(labeled_data) < 10:
             # Not enough data yet
@@ -1063,9 +1122,10 @@ def enhanced_sentiment_analysis(text_series):
         if make_adjustment:
             # Calculate adjusted score
             weights = {
-                'mnb': 0.8,       # MNB still gets majority weight
+                'mnb': 0.5,       # MNB still gets majority weight
                 'emoji': 0.1,     # Small contribution from emojis
-                'lexicon': 0.1    # Small contribution from lexicon
+                'lexicon': 0.3,    # Small contribution from lexicon
+                'vader' : 0.1
             }
             
             # Convert mnb_category to score for weighted calculation
@@ -1154,8 +1214,8 @@ def get_sentiment_breakdown(text):
     weights = {
         'vader': 0.4,
         'ml': 0.3,
-        'emoji': 0.15,
-        'lexicon': 0.15
+        'emoji': 0.05,
+        'lexicon': 0.25
     }
     
     # Calculate final score
