@@ -12,6 +12,7 @@ from sentiment_analysis import (
     get_sentiment_breakdown,
     analyze_for_trolling
 )
+from database import db  # Add this import
 # Import Tagalog sentiment functions
 from tagalog_sentiment import (
     is_tagalog,
@@ -39,8 +40,11 @@ import plotly.graph_objects as go
 import io
 import csv
 import chardet  # You may need to pip install chardet
+import matplotlib.font_manager as fm
 
-
+# Define global data directory
+data_dir = os.path.join(os.path.dirname(__file__), 'data')
+os.makedirs(data_dir, exist_ok=True) 
 troll_detector = TrollDetector()
 
 
@@ -60,6 +64,71 @@ st.set_page_config(
 
 st.title("TikTok Sentiment Analysis")
 st.caption("Market Trend Classification Dashboard")
+
+# After the imports and before the main app code
+def create_emoji_chart(emoji_counts):
+    """Create a horizontal bar chart for emoji counts with proper emoji display."""
+    # Set font that supports emojis
+    plt.rcParams['font.family'] = ['Segoe UI Emoji', 'Segoe UI Symbol', 'Apple Color Emoji', 'Noto Color Emoji', 'Noto Emoji']
+    
+    # Create figure with higher DPI for better emoji rendering
+    fig, ax = plt.subplots(figsize=(10, 6), dpi=150)
+    
+    # Sort emojis by count and get top 10
+    top_emojis = emoji_counts.most_common(10)
+    
+    # Separate emojis and counts
+    emojis = [e for e, _ in top_emojis]
+    counts = [count for _, count in top_emojis]
+    
+    # Create horizontal bar chart
+    bars = ax.barh(range(len(emojis)), counts, color='#2196F3')
+    
+    # Set emoji labels with increased size
+    ax.set_yticks(range(len(emojis)))
+    ax.set_yticklabels(emojis, fontsize=16, fontfamily='Segoe UI Emoji')
+    
+    # Customize chart
+    ax.set_title('Top 10 Emojis', pad=20, fontsize=14)
+    ax.set_xlabel('Count', fontsize=12)
+    
+    # Remove frame
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    
+    # Add count labels on bars
+    for i, bar in enumerate(bars):
+        width = bar.get_width()
+        ax.text(width, bar.get_y() + bar.get_height()/2,
+                f'{int(width)}', 
+                ha='left', va='center', fontsize=12,
+                fontfamily='sans-serif')  # Use standard font for numbers
+    
+    # Adjust layout to prevent emoji cutoff
+    plt.subplots_adjust(left=0.2)
+    plt.tight_layout()
+    return fig
+
+# Function to create a wordcloud
+def create_wordcloud(text_series):
+    """Create a WordCloud from a series of texts."""
+    all_text = ' '.join(text_series.fillna(''))
+    
+    # Generate wordcloud
+    wordcloud = WordCloud(
+        width=800, 
+        height=400, 
+        background_color='white',
+        max_words=100,
+        contour_width=1
+    ).generate(all_text)
+    
+    # Plot
+    fig, ax = plt.subplots(figsize=(10, 5))
+    ax.imshow(wordcloud, interpolation='bilinear')
+    ax.axis('off')
+    
+    return fig
 
 # Functions for language-aware sentiment analysis
 def add_language_settings():
@@ -150,6 +219,48 @@ def analyze_comment_with_trolling(text, language_mode=None):
         'troll_score': troll_analysis['troll_score'],
         'language': troll_analysis['language']
     }
+
+def refresh_database_state():
+    """Refresh the database state in the session."""
+    st.session_state.sentiment_corrections = db.get_corrections()
+    st.session_state.last_refresh_time = pd.Timestamp.now()
+
+def save_sentiment_correction(comments_df, selected_comment_idx, corrected_sentiment):
+    """
+    Saves a corrected sentiment using the database system.
+    
+    Args:
+        comments_df: The dataframe with comments data
+        selected_comment_idx: Index of the selected comment
+        corrected_sentiment: The corrected sentiment value
+    
+    Returns:
+        bool: True if successful, False otherwise
+    """
+    try:
+        # Update the dataframe
+        comments_df.loc[selected_comment_idx, 'Enhanced Sentiment'] = f"{corrected_sentiment} (1.00)"
+        
+        # Get the comment and detect language
+        comment = comments_df.loc[selected_comment_idx, 'Comment']
+        language = 'tagalog' if is_tagalog(comment) else 'english'
+        
+        # Save to database
+        success = db.save_correction(
+            comment=comment,
+            corrected_sentiment=corrected_sentiment,
+            language=language
+        )
+        
+        if success:
+            # Refresh the database state immediately
+            refresh_database_state()
+            st.success(f"Sentiment correction saved: {comment} -> {corrected_sentiment}")
+        
+        return success
+    except Exception as e:
+        st.error(f"Error saving correction: {e}")
+        return False
 
 
 def get_sentiment_breakdown_with_language(text, language_mode=None):
@@ -442,51 +553,41 @@ def preprocess_text(text):
         'demojized': text_with_emoji_names
     }
 
-# Function to create a wordcloud
-def create_wordcloud(text_series):
-    """Create a WordCloud from a series of texts."""
-    all_text = ' '.join(text_series.fillna(''))
-    
-    # Generate wordcloud
-    wordcloud = WordCloud(
-        width=800, 
-        height=400, 
-        background_color='white',
-        max_words=100,
-        contour_width=1
-    ).generate(all_text)
-    
-    # Plot
-    fig, ax = plt.subplots(figsize=(10, 5))
-    ax.imshow(wordcloud, interpolation='bilinear')
-    ax.axis('off')
-    
-    return fig
-
 # Function to analyze sentiment distribution
 def plot_sentiment_distribution(df, sentiment_column):
     """Create a bar chart of sentiment distribution."""
     # Extract sentiment categories without scores
-    categories = df[sentiment_column].apply(lambda x: x.split(' ')[0])
+    categories = df[sentiment_column].apply(lambda x: x.split(' ')[0] if isinstance(x, str) else x)
     
     # Count occurrences
     counts = categories.value_counts()
     
     # Create plot
     fig, ax = plt.subplots(figsize=(10, 5))
-    colors = {'Positive': 'green', 'Negative': 'red', 'Neutral': 'gray'}
+    colors = {'Positive': '#2ecc71', 'Negative': '#e74c3c', 'Neutral': '#95a5a6'}
     
-    sns.barplot(x=counts.index, y=counts.values, palette=[colors.get(cat, 'blue') for cat in counts.index], ax=ax)
-    ax.set_title('Sentiment Distribution')
+    # Create bar plot
+    bars = ax.bar(range(len(counts)), counts.values, color=[colors.get(cat, '#3498db') for cat in counts.index])
+    
+    # Customize chart
+    ax.set_title('Sentiment Distribution', pad=20)
     ax.set_ylabel('Count')
-    ax.set_xlabel('Sentiment')
+    ax.set_xticks(range(len(counts)))
+    ax.set_xticklabels(counts.index)
+    
+    # Remove frame
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
     
     # Add percentage labels
     total = counts.sum()
     for i, count in enumerate(counts):
         percentage = 100 * count / total
-        ax.text(i, count + 5, f'{percentage:.1f}%', ha='center')
+        ax.text(i, count + (max(counts) * 0.02), 
+                f'{percentage:.1f}%', 
+                ha='center', va='bottom')
     
+    plt.tight_layout()
     return fig
 
 # Create an interactive heatmap for sentiment comparison
@@ -618,51 +719,13 @@ You can set your language preference in the sidebar under "Language Settings".
 
 # Create sidebar menu
 st.sidebar.title("Navigation")
-page = st.sidebar.radio("Choose a section", ["Upload Data", "Fetch TikTok Comments", "Sentiment Explorer", "About"])
+page = st.sidebar.radio("Choose a section", ["Upload Data", "Fetch TikTok Comments", "Sentiment Explorer", "Database Corrections", "About"])
 
 # Add language settings
 language_mode = add_language_settings()
 
-# About page
-if page == "About":
-    st.header("About TikTok Sentiment Analysis")
-    st.markdown("""
-    This application allows you to analyze the sentiment of TikTok comments to understand audience reactions and market trends.
-    
-    ### Features:
-    - Upload Excel files containing TikTok comments
-    - Fetch comments directly from TikTok videos using Apify
-    - Analyze sentiment using multiple techniques:
-      - VADER sentiment analysis (rule-based)
-      - Machine learning-based classification (Multinomial Naive Bayes)
-      - Enhanced analysis with TikTok-specific lexicon
-      - Emoji sentiment analysis
-      - Ensemble method combining all approaches
-    - Visualize sentiment distribution
-    - Generate word clouds from comments
-    - Extract hashtags and analyze trends
-    - Interactive sentiment comparison
-    
-    ### How to Use:
-    1. Navigate to "Upload Data" to analyze your own data
-    2. Or go to "Fetch TikTok Comments" to analyze comments from a TikTok video URL
-    3. Use "Sentiment Explorer" to understand how sentiment analysis works
-    4. Review the analysis and visualizations
-    
-    ### Technologies Used:
-    - NLTK for natural language processing
-    - scikit-learn for machine learning
-    - VADER for rule-based sentiment analysis
-    - Apify for data collection
-    - Streamlit for the web interface
-    - Plotly and Matplotlib for visualizations
-    """)
-    
-    # Add Tagalog language support information
-    st.markdown(TAGALOG_ABOUT_TEXT)
-
-# Upload section
-elif page == "Upload Data":
+# Page navigation logic
+if page == "Upload Data":
     st.header("Upload Your Data File")
     
     # Update file uploader to accept both xlsx and csv
@@ -676,6 +739,9 @@ elif page == "Upload Data":
             
             if comments_df is not None:
                 st.success(f"File uploaded and processed successfully. Found {len(comments_df)} comments.")
+                
+                # Refresh database state when new file is uploaded
+                refresh_database_state()
                 
                 # Continue with your existing processing pipeline
                 with st.spinner("Analyzing comments..."):
@@ -708,8 +774,6 @@ elif page == "Upload Data":
                     )
                     comments_df['Enhanced Sentiment'] = troll_results.apply(lambda x: x['sentiment_text'])
                     comments_df['Is Troll'] = troll_results.apply(lambda x: x['is_troll'])
-                    comments_df['Troll Score'] = troll_results.apply(lambda x: x['troll_score']
-                    )
                     
                 
                 # Create tabs for different views
@@ -718,7 +782,7 @@ elif page == "Upload Data":
                 with tab1:
                     # Display data
                     st.subheader("Processed Comments")
-                    st.dataframe(comments_df[['Comment', 'Processed Comment', 'VADER Sentiment', 'MNB Sentiment', 'Enhanced Sentiment', 'Is Troll', 'Troll Score']])
+                    st.dataframe(comments_df[['Comment', 'Processed Comment', 'VADER Sentiment', 'MNB Sentiment', 'Enhanced Sentiment', 'Is Troll']])
                     
                     # Allow download of processed data
                     csv = comments_df.to_csv(index=False)
@@ -730,49 +794,30 @@ elif page == "Upload Data":
                     )
                     
                     # Sentiment Correction Feature
+                    # Sentiment Correction Feature
                     st.subheader("Sentiment Correction")
                     st.write("Select comments to manually correct their sentiment labels:")
-                        
+
                     # Let user select a comment
                     selected_comment_idx = st.selectbox("Select comment to relabel:", 
-                                                       options=comments_df.index.tolist(),
-                                                       format_func=lambda x: comments_df.loc[x, 'Comment'][:50] + "...")
+                                            options=comments_df.index.tolist(),
+                                            format_func=lambda x: comments_df.loc[x, 'Comment'][:50] + "...")
 
-                    # Show current sentiment
+# Show current sentiment
                     current_sentiment = comments_df.loc[selected_comment_idx, 'Enhanced Sentiment']
                     st.write(f"Current sentiment: {current_sentiment}")
 
-                    # Let user choose new sentiment
+# Let user choose new sentiment
                     corrected_sentiment = st.radio("Correct sentiment:", 
-                                                  options=["Positive", "Neutral", "Negative"])
+                                            options=["Positive", "Neutral", "Negative"])
 
                     if st.button("Save Correction"):
-                        # Save the corrected sentiment with a confidence of 1.0 (manual label)
-                        comments_df.loc[selected_comment_idx, 'Enhanced Sentiment'] = f"{corrected_sentiment} (1.00)"
-                        
-                        # Save to a corrections file for future model training
-                        correction_data = pd.DataFrame({
-                            'Comment': [comments_df.loc[selected_comment_idx, 'Comment']],
-                            'Corrected_Sentiment': [corrected_sentiment]
-                        })
-                        
-                        # Append to CSV if it exists, create if it doesn't
-                        try:
-                            data_dir = os.path.join(os.path.dirname(__file__), 'data')
-                            csv_path = os.path.join(data_dir, 'sentiment_corrections.csv')
-                            existing_corrections = pd.read_csv(csv_path)
-                            correction_data = pd.concat([existing_corrections, correction_data])
-                        except:
-                            pass
-                        
-                        # Create a data directory if it doesn't exist
-                            data_dir = os.path.join(os.path.dirname(__file__), 'data')
-                            os.makedirs(data_dir, exist_ok=True)
-
-                            # Save the file in the data directory
-                            csv_path = os.path.join(data_dir, 'sentiment_corrections.csv')
-                            correction_data.to_csv(csv_path, index=False)
-                        st.success(f"Comment sentiment corrected to {corrected_sentiment} and saved for future training.")
+    # Call our function to handle the saving
+                        success = save_sentiment_correction(comments_df, selected_comment_idx, corrected_sentiment)
+                        if success:
+                            st.success(f"Comment sentiment corrected to {corrected_sentiment} and saved for future training.")
+                        else:
+                            st.error("Failed to save correction. See console for details.")
                     
                     # Add language detection information
                     st.subheader("Language Information")
@@ -791,14 +836,21 @@ elif page == "Upload Data":
                     with col1:
                         st.subheader("Sentiment Distribution")
                         # Plot sentiment distribution
-                        fig = plot_sentiment_distribution(comments_df, 'Enhanced Sentiment')
+                        sentiment_fig = plot_sentiment_distribution(comments_df, 'Enhanced Sentiment')
+                        st.pyplot(sentiment_fig)
+                        
+                        # Troll Comment Distribution
                         st.subheader("Troll Comment Distribution")
                         troll_counts = comments_df['Is Troll'].value_counts()
                         fig, ax = plt.subplots(figsize=(10, 5))
-                        colors = ['red', 'green']
-                        sns.barplot(x=['Troll', 'Not Troll'], y=[troll_counts.get(True, 0), troll_counts.get(False, 0)], palette=colors, ax=ax)
+                        colors = ['#e74c3c', '#2ecc71']  # Red for trolls, green for non-trolls
+                        sns.barplot(x=['Troll', 'Not Troll'], 
+                                   y=[troll_counts.get(True, 0), troll_counts.get(False, 0)], 
+                                   palette=colors, ax=ax)
                         ax.set_title('Troll vs. Normal Comments')
                         ax.set_ylabel('Count')
+                        
+                        # Add percentage labels
                         total = len(comments_df)
                         troll_pct = 100 * troll_counts.get(True, 0) / total
                         normal_pct = 100 * troll_counts.get(False, 0) / total
@@ -807,26 +859,14 @@ elif page == "Upload Data":
                         st.pyplot(fig)
                     
                     with col2:
-                        st.subheader("Word Cloud")
-                        fig = create_wordcloud(comments_df['Processed Comment'])
-                        st.pyplot(fig)
-                    
-                    # Emoji analysis
-                    st.subheader("Emoji Analysis")
-                    all_emojis = ''.join(comments_df['Emojis'].fillna(''))
-                    if all_emojis:
-                        emoji_counter = Counter(all_emojis)
-                        top_emojis = emoji_counter.most_common(10)
-                        
-                        emoji_df = pd.DataFrame(top_emojis, columns=['Emoji', 'Count'])
-                        
-                        # Create horizontal bar chart for emojis
-                        fig, ax = plt.subplots(figsize=(10, 5))
-                        sns.barplot(y=emoji_df['Emoji'], x=emoji_df['Count'], ax=ax, orient='h')
-                        ax.set_title('Top 10 Emojis')
-                        st.pyplot(fig)
-                    else:
-                        st.info("No emojis found in the comments.")
+                        st.subheader("Emoji Analysis")
+                        all_emojis = ''.join(comments_df['Emojis'].fillna(''))
+                        if all_emojis:
+                            emoji_counter = Counter(all_emojis)
+                            emoji_fig = create_emoji_chart(emoji_counter)
+                            st.pyplot(emoji_fig)
+                        else:
+                            st.info("No emojis found in the comments.")
                 
                 with tab3:
                     # Sentiment Analysis Comparison
@@ -970,8 +1010,7 @@ elif page == "Upload Data":
                         intent_fig.update_layout(xaxis_title="Purchase Intent Score", 
                                                 yaxis_title="Number of Comments")
                         st.plotly_chart(intent_fig, use_container_width=True)
-                     
-# TikTok Comment Fetching
+                    
 elif page == "Fetch TikTok Comments":
     st.header("Fetch TikTok Comments")
     
@@ -1019,8 +1058,6 @@ elif page == "Fetch TikTok Comments":
                             )
                             comments_df['Enhanced Sentiment'] = troll_results.apply(lambda x: x['sentiment_text'])
                             comments_df['Is Troll'] = troll_results.apply(lambda x: x['is_troll'])
-                            comments_df['Troll Score'] = troll_results.apply(lambda x: x['troll_score']
-                                                 )
                     
                     # Create tabs for different views
                     tab1, tab2, tab3, tab4, tab5 = st.tabs(["Data View", "Visualizations", "Sentiment Analysis", "Statistics", "Market Trends"])
@@ -1029,7 +1066,7 @@ elif page == "Fetch TikTok Comments":
                     with tab1:
                         # Display data
                         st.subheader("Processed Comments")
-                        st.dataframe(comments_df[['Comment', 'Processed Comment', 'VADER Sentiment', 'MNB Sentiment', 'Enhanced Sentiment', 'Is Troll', 'Troll Score']])
+                        st.dataframe(comments_df[['Comment', 'Processed Comment', 'VADER Sentiment', 'MNB Sentiment', 'Enhanced Sentiment', 'Is Troll']])
                         
                         # Allow download of processed data
                         csv = comments_df.to_csv(index=False)
@@ -1059,27 +1096,30 @@ elif page == "Fetch TikTok Comments":
                         with col1:
                             st.subheader("Sentiment Distribution")
                             # Plot sentiment distribution
-                            fig = plot_sentiment_distribution(comments_df, 'Enhanced Sentiment')
-                            st.pyplot(fig)
+                            sentiment_fig = plot_sentiment_distribution(comments_df, 'Enhanced Sentiment')
+                            st.pyplot(sentiment_fig)
                         
                         with col2:
-                            st.subheader("Word Cloud")
-                            fig = create_wordcloud(comments_df['Processed Comment'])
-                            st.pyplot(fig)
+                            st.subheader("Emoji Analysis")
+                            all_emojis = ''.join(comments_df['Emojis'].fillna(''))
+                            if all_emojis:
+                                emoji_counter = Counter(all_emojis)
+                                
+                                # Create and display the emoji chart
+                                emoji_fig = create_emoji_chart(emoji_counter)
+                                st.pyplot(emoji_fig)
+                            else:
+                                st.info("No emojis found in the comments.")
                         
                         # Emoji analysis
                         st.subheader("Emoji Analysis")
                         all_emojis = ''.join(comments_df['Emojis'].fillna(''))
                         if all_emojis:
                             emoji_counter = Counter(all_emojis)
-                            top_emojis = emoji_counter.most_common(10)
                             
-                            emoji_df = pd.DataFrame(top_emojis, columns=['Emoji', 'Count'])
-                            # Create horizontal bar chart for emojis
-                            fig, ax = plt.subplots(figsize=(10, 5))
-                            sns.barplot(y=emoji_df['Emoji'], x=emoji_df['Count'], ax=ax, orient='h')
-                            ax.set_title('Top 10 Emojis')
-                            st.pyplot(fig)
+                            # Create and display the emoji chart
+                            emoji_fig = create_emoji_chart(emoji_counter)
+                            st.pyplot(emoji_fig)
                         else:
                             st.info("No emojis found in the comments.")
                     
@@ -1318,7 +1358,8 @@ elif page == "Sentiment Explorer":
                 """)
             
             st.write("The final sentiment is a weighted combination of all methods, with language-specific optimizations.")
-    # Market Trends standalone page
+
+# Market Trends standalone page
 elif page == "Market Trends":
     st.header("Market Trend Analysis")
     
@@ -1429,6 +1470,100 @@ elif page == "Market Trends":
             
             # Show full UI
             add_market_trends_tab(sample_df)
+
+elif page == "Database Corrections":
+    st.title("Sentiment Corrections Database Viewer")
+    
+    # Add buttons in a row
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        if st.button("🔄 Refresh Database"):
+            refresh_database_state()
+            st.success("Database refreshed!")
+    
+    with col2:
+        if st.button("🗑️ Clear Database"):
+            if db.clear_database():
+                refresh_database_state()
+                st.success("Database cleared successfully!")
+            else:
+                st.error("Failed to clear database.")
+    
+    # Get corrections from session state or refresh if needed
+    if 'sentiment_corrections' not in st.session_state:
+        refresh_database_state()
+    
+    corrections_df = st.session_state.sentiment_corrections
+    
+    # Display basic statistics
+    st.header("Database Statistics")
+    total_corrections = db.get_correction_count()
+    st.write(f"Total number of corrections: {total_corrections}")
+    
+    # Display all corrections
+    st.header("All Corrections")
+    if not corrections_df.empty:
+        # Convert timestamp to datetime if it's not already
+        if 'timestamp' in corrections_df.columns:
+            corrections_df['timestamp'] = pd.to_datetime(corrections_df['timestamp'])
+        
+        # Reorder columns to match the desired display (without Troll Score)
+        columns_order = ['id', 'comment', 'corrected_sentiment', 'timestamp', 'language', 'confidence']
+        corrections_df = corrections_df.reindex(columns=columns_order)
+        
+        # Display the dataframe with the specified column order
+        st.dataframe(
+            corrections_df,
+            column_config={
+                "id": "ID",
+                "comment": "Comment",
+                "corrected_sentiment": "Corrected Sentiment",
+                "timestamp": "Timestamp",
+                "language": "Language",
+                "confidence": "Confidence"
+            },
+            hide_index=True
+        )
+        
+        # Analytics section
+        st.header("Analytics")
+        
+        # Create two columns for the charts
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            # Sentiment Distribution
+            st.subheader("Sentiment Distribution")
+            sentiment_counts = corrections_df['corrected_sentiment'].value_counts()
+            st.bar_chart(sentiment_counts)
+        
+        with col2:
+            # Language Distribution
+            st.subheader("Language Distribution")
+            language_counts = corrections_df['language'].value_counts()
+            st.bar_chart(language_counts)
+        
+        # Export options
+        st.header("Export Options")
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            if st.button("Export to CSV"):
+                db.export_to_csv("sentiment_corrections_export.csv")
+                st.success("Data exported to sentiment_corrections_export.csv")
+        
+        with col2:
+            if st.button("Create Database Backup"):
+                db.backup_database("data/sentiment_corrections_backup.db")
+                st.success("Database backup created")
+    else:
+        st.info("No corrections found in the database.")
+        st.write("Corrections will appear here when users manually correct sentiment values.")
+
+elif page == "About":
+    st.header("About TikTok Sentiment Analysis")
+    st.write(TAGALOG_ABOUT_TEXT)
 
 # Run the app
 if __name__ == "__main__":

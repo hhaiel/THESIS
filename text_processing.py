@@ -4,6 +4,11 @@ import nltk
 from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
+import pandas as pd
+import joblib
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.pipeline import Pipeline
 
 # Download required NLTK resources
 try:
@@ -292,8 +297,9 @@ def train_with_labeled_data():
     Returns the trained model or None if no labeled data exists.
     """
     try:
-        # Try to load labeled data
-        labeled_data = pd.read_csv('sentiment_corrections.csv')
+        # Try to load labeled data from database
+        from database import db
+        labeled_data = db.get_corrections()
         
         if len(labeled_data) < 10:
             # Not enough data yet
@@ -303,8 +309,8 @@ def train_with_labeled_data():
         base_texts, base_labels = generate_training_data()
         
         # Extract labeled comments and sentiments
-        labeled_texts = labeled_data['Comment'].tolist()
-        labeled_sentiments = labeled_data['Corrected_Sentiment'].tolist()
+        labeled_texts = labeled_data['comment'].tolist()
+        labeled_sentiments = labeled_data['corrected_sentiment'].tolist()
         
         # Combine base and labeled data
         all_texts = base_texts + labeled_texts

@@ -754,54 +754,37 @@ def augment_tagalog_data(texts, labels, augmentation_factor=2):
 
     # Enhanced combined training function for multilingual sentiment model
 def train_multilingual_sentiment_model():
-        """
-        Create and train an enhanced sentiment model that works well for both
-        English and Tagalog, including code-switching and social media language.
+    """
+    Train a multilingual sentiment model using English and Tagalog data.
+    """
+    try:
+        # 1. Load English training data
+        english_texts, english_labels = generate_english_training_data()
         
-        Returns the trained model pipeline ready for inference.
-        """
-        import pandas as pd
-        import numpy as np
-        from sklearn.feature_extraction.text import TfidfVectorizer
-        from sklearn.naive_bayes import MultinomialNB
-        from sklearn.ensemble import VotingClassifier, RandomForestClassifier
-        from sklearn.linear_model import LogisticRegression
-        from sklearn.model_selection import train_test_split
-        from sklearn.pipeline import Pipeline
-        from sklearn.metrics import accuracy_score, classification_report
-        import joblib
-        from pathlib import Path
+        # 2. Load Tagalog training data
+        tagalog_texts, tagalog_labels = generate_tagalog_training_data()
         
-        # Import regular sentiment analysis functions
-        from sentiment_analysis import generate_training_data
+        # 3. Load user corrections from database
+        from database import db
+        corrections_df = db.get_corrections()
         
-        # 1. Generate base training data
-        # Get English training data
-        english_texts, english_labels = generate_training_data()
+        # Filter corrections by language
+        tagalog_corrections = corrections_df[corrections_df['language'] == 'tagalog']
+        english_corrections = corrections_df[corrections_df['language'] == 'english']
         
-        # Get enhanced Tagalog training data
-        tagalog_texts, tagalog_labels = generate_enhanced_tagalog_training_data()
+        # Get correction texts and labels
+        tagalog_correction_texts = tagalog_corrections['comment'].tolist()
+        tagalog_correction_labels = tagalog_corrections['corrected_sentiment'].tolist()
+        english_correction_texts = english_corrections['comment'].tolist()
+        english_correction_labels = english_corrections['corrected_sentiment'].tolist()
         
-        # 2. Augment Tagalog data to create more variations
-        augmented_tagalog_texts, augmented_tagalog_labels = augment_tagalog_data(
-            tagalog_texts, tagalog_labels, augmentation_factor=3
-        )
-        
-        # 3. Load user corrections if available
-        try:
-            corrections_df = pd.read_csv('sentiment_corrections.csv')
-            correction_texts = corrections_df['Comment'].tolist()
-            correction_labels = corrections_df['Corrected_Sentiment'].tolist()
-            
-            print(f"Loaded {len(correction_texts)} user corrections for training")
-        except:
-            correction_texts = []
-            correction_labels = []
-            print("No user corrections found, training without them")
+        print(f"Loaded {len(tagalog_correction_texts)} Tagalog corrections and {len(english_correction_texts)} English corrections for training")
         
         # 4. Combine all training data
-        all_texts = english_texts + augmented_tagalog_texts + correction_texts
-        all_labels = english_labels + augmented_tagalog_labels + correction_labels
+        all_texts = (english_texts + tagalog_texts + 
+                    tagalog_correction_texts + english_correction_texts)
+        all_labels = (english_labels + tagalog_labels + 
+                     tagalog_correction_labels + english_correction_labels)
         
         # 5. Split into training and testing sets (80/20 split)
         X_train, X_test, y_train, y_test = train_test_split(
@@ -809,10 +792,9 @@ def train_multilingual_sentiment_model():
         )
         
         # 6. Create feature extraction with TF-IDF
-        # Add ngrams up to 4 words to capture phrases
         tfidf = TfidfVectorizer(
-            max_features=10000,  # Increased features to capture more vocabulary
-            ngram_range=(1, 4),  # Extended to 4-grams to capture more phrases
+            max_features=10000,
+            ngram_range=(1, 4),
             min_df=2,
             use_idf=True,
             sublinear_tf=True,
@@ -836,10 +818,8 @@ def train_multilingual_sentiment_model():
         
         # Print training information
         print(f"Training multilingual sentiment model with {len(X_train)} examples")
-        print(f"English examples: {len(english_texts)}")
-        print(f"Tagalog examples: {len(tagalog_texts)}")
-        print(f"Augmented Tagalog examples: {len(augmented_tagalog_texts)}")
-        print(f"User corrections: {len(correction_texts)}")
+        print(f"English examples: {len(english_texts) + len(english_correction_texts)}")
+        print(f"Tagalog examples: {len(tagalog_texts) + len(tagalog_correction_texts)}")
         
         # Train the model
         pipeline.fit(X_train, y_train)
@@ -861,6 +841,10 @@ def train_multilingual_sentiment_model():
             print(f"Could not save model: {e}")
         
         return pipeline
+        
+    except Exception as e:
+        print(f"Error training multilingual model: {e}")
+        return None
 
     # Function to predict sentiment using the multilingual model
 def predict_multilingual_sentiment(text_series):
