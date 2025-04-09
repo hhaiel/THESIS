@@ -40,7 +40,9 @@ import io
 import csv
 import chardet  # You may need to pip install chardet
 
-
+# Define global data directory
+data_dir = os.path.join(os.path.dirname(__file__), 'data')
+os.makedirs(data_dir, exist_ok=True) 
 troll_detector = TrollDetector()
 
 
@@ -150,6 +152,55 @@ def analyze_comment_with_trolling(text, language_mode=None):
         'troll_score': troll_analysis['troll_score'],
         'language': troll_analysis['language']
     }
+def save_sentiment_correction(comments_df, selected_comment_idx, corrected_sentiment):
+    """
+    Saves a corrected sentiment to CSV file.
+    
+    Args:
+        comments_df: The dataframe with comments data
+        selected_comment_idx: Index of the selected comment
+        corrected_sentiment: The corrected sentiment value
+    
+    Returns:
+        bool: True if successful, False otherwise
+    """
+    try:
+        # Update the dataframe
+        comments_df.loc[selected_comment_idx, 'Enhanced Sentiment'] = f"{corrected_sentiment} (1.00)"
+        
+        # Create data directory if needed
+        data_dir = os.path.join(os.path.dirname(__file__), 'data')
+        os.makedirs(data_dir, exist_ok=True)
+        
+        # Define file path
+        csv_path = os.path.join(data_dir, 'sentiment_corrections.csv')
+        
+        # Create new correction DataFrame
+        new_data = pd.DataFrame({
+            'Comment': [comments_df.loc[selected_comment_idx, 'Comment']],
+            'Corrected_Sentiment': [corrected_sentiment]
+        })
+        
+        # Handle file operations
+        if os.path.exists(csv_path):
+            try:
+                # Read existing file
+                existing_data = pd.read_csv(csv_path)
+                # Concatenate with new data
+                combined_data = pd.concat([existing_data, new_data], ignore_index=True)
+                # Save combined data
+                combined_data.to_csv(csv_path, index=False)
+            except Exception as e:
+                # If reading fails, just write the new data
+                new_data.to_csv(csv_path, index=False)
+        else:
+            # No existing file, create new one
+            new_data.to_csv(csv_path, index=False)
+        
+        return True
+    except Exception as e:
+        print(f"Error saving correction: {e}")
+        return False
 
 
 def get_sentiment_breakdown_with_language(text, language_mode=None):
@@ -730,49 +781,30 @@ elif page == "Upload Data":
                     )
                     
                     # Sentiment Correction Feature
+                    # Sentiment Correction Feature
                     st.subheader("Sentiment Correction")
                     st.write("Select comments to manually correct their sentiment labels:")
-                        
+
                     # Let user select a comment
                     selected_comment_idx = st.selectbox("Select comment to relabel:", 
-                                                       options=comments_df.index.tolist(),
-                                                       format_func=lambda x: comments_df.loc[x, 'Comment'][:50] + "...")
+                                            options=comments_df.index.tolist(),
+                                            format_func=lambda x: comments_df.loc[x, 'Comment'][:50] + "...")
 
-                    # Show current sentiment
+# Show current sentiment
                     current_sentiment = comments_df.loc[selected_comment_idx, 'Enhanced Sentiment']
                     st.write(f"Current sentiment: {current_sentiment}")
 
-                    # Let user choose new sentiment
+                # Let user choose new sentiment
                     corrected_sentiment = st.radio("Correct sentiment:", 
-                                                  options=["Positive", "Neutral", "Negative"])
+                                            options=["Positive", "Neutral", "Negative"])
 
                     if st.button("Save Correction"):
-                        # Save the corrected sentiment with a confidence of 1.0 (manual label)
-                        comments_df.loc[selected_comment_idx, 'Enhanced Sentiment'] = f"{corrected_sentiment} (1.00)"
-                        
-                        # Save to a corrections file for future model training
-                        correction_data = pd.DataFrame({
-                            'Comment': [comments_df.loc[selected_comment_idx, 'Comment']],
-                            'Corrected_Sentiment': [corrected_sentiment]
-                        })
-                        
-                        # Append to CSV if it exists, create if it doesn't
-                        try:
-                            data_dir = os.path.join(os.path.dirname(__file__), 'data')
-                            csv_path = os.path.join(data_dir, 'sentiment_corrections.csv')
-                            existing_corrections = pd.read_csv(csv_path)
-                            correction_data = pd.concat([existing_corrections, correction_data])
-                        except:
-                            pass
-                        
-                        # Create a data directory if it doesn't exist
-                            data_dir = os.path.join(os.path.dirname(__file__), 'data')
-                            os.makedirs(data_dir, exist_ok=True)
-
-                            # Save the file in the data directory
-                            csv_path = os.path.join(data_dir, 'sentiment_corrections.csv')
-                            correction_data.to_csv(csv_path, index=False)
-                        st.success(f"Comment sentiment corrected to {corrected_sentiment} and saved for future training.")
+    # Call our function to handle the saving
+                        success = save_sentiment_correction(comments_df, selected_comment_idx, corrected_sentiment)
+                        if success:
+                            st.success(f"Comment sentiment corrected to {corrected_sentiment} and saved for future training.")
+                        else:
+                            st.error("Failed to save correction. See console for details.")
                     
                     # Add language detection information
                     st.subheader("Language Information")

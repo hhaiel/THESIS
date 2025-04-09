@@ -222,7 +222,14 @@ FILIPINO_LEXICON = {
     'husay': 0.5, 'ang galing': 0.5, 'ang cute': 0.5, 'ang ganda': 0.5,
     'idol': 0.5, 'petmalu': 0.5, 'lodi': 0.7, 'solid': 0.5, 'lupet': 0.5,
     'panalo': 0.5, 'sana all': 0.5, 'nakakatuwa': 0.5, 'bongga': 0.5,
-    
+    'hindi maganda': -0.6, 'di maganda': -0.6, 'hindi okay': -0.6, 'di okay': -0.6,
+    'pangit talaga': -0.7, 'sobrang pangit': -0.8, 'ang panget': -0.7,
+    'bulok': -0.7, 'ampangit': -0.8, 'kaloka': -0.5, 'nakakadisappoint': -0.7,
+    'nakakainis': -0.7, 'nakakabwisit': -0.7, 'hindi worth it': -0.7,
+    'sayang pera': -0.8, 'nasayang': -0.7, 'hindi sulit': -0.7,
+    'palpak': -0.8, 'parang basura': -0.8, 'para lang basura': -0.8,
+    'walang kwenta': -0.8, 'wala kwenta': -0.8,
+
     # Negative Filipino/Taglish words
     'panget': -0.7, 'pangit': -0.7, 'chaka': -0.7, 'nakakabwisit': -0.8,
     'basura': -0.8, 'bastos': -0.7, 'walang kwenta': -0.8, 'epal': -0.7,
@@ -397,31 +404,31 @@ def detect_language(text):
     if not isinstance(text, str) or not text:
         return 'unknown'
     
-    # Common Filipino markers that help identify Tagalog/Taglish
+    # More comprehensive Filipino markers
     filipino_markers = ['ang', 'ng', 'mga', 'sa', 'ko', 'mo', 'ka', 'naman', 'po',
-                        'na', 'ay', 'yung', 'ito', 'yan', 'siya', 'ikaw', 'ako']
+                        'na', 'ay', 'yung', 'ito', 'yan', 'siya', 'ikaw', 'ako',
+                        'hindi', 'di', 'para', 'nung', 'nang', 'kasi', 'dahil', 
+                        'kung', 'pag', 'talaga', 'lang', 'pero', 'kaya']
     
-    # Count Filipino marker words
+    # Count Filipino marker words with a lower threshold
     words = text.lower().split()
     filipino_word_count = sum(1 for word in words if word in filipino_markers)
     filipino_lexicon_words = sum(1 for word in words if word in FILIPINO_LEXICON)
     
-    # If significant Filipino markers are found
-    if filipino_word_count >= 2 or filipino_lexicon_words >= 2:
-        # Simple check for English words
+    # Consider text Tagalog/mixed with fewer markers
+    if filipino_word_count >= 1 or filipino_lexicon_words >= 1:
         english_markers = ['the', 'of', 'and', 'to', 'is', 'in', 'it', 'you', 'that']
         english_count = sum(1 for word in words if word in english_markers)
         
-        if english_count >= 2:
+        if english_count >= 1:
             return 'mixed'  # Likely Taglish
         else:
             return 'tl'     # Likely Filipino/Tagalog
     
-    # Try standard language detection (this can be error-prone for short texts)
+    # Try standard language detection as before
     try:
         return detect(text)
     except:
-        # If language detection fails
         return 'unknown'
     
     # Function to detect troll patterns
@@ -630,6 +637,7 @@ def preprocess_for_sentiment(text):
         'language': language  
     }
 
+
 # VADER Sentiment Analysis
 def analyze_sentiment_vader(text):
     """
@@ -692,8 +700,13 @@ def train_with_labeled_data():
         base_texts, base_labels = generate_training_data()
         
         # Extract labeled comments and sentiments
+        # Clean NaN values from the data
+        labeled_data = labeled_data.dropna(subset=['Comment', 'Corrected_Sentiment'])
         labeled_texts = labeled_data['Comment'].tolist()
         labeled_sentiments = labeled_data['Corrected_Sentiment'].tolist()
+        
+        # Ensure all texts are strings (convert any remaining non-string values)
+        labeled_texts = [str(text) for text in labeled_texts]
         
         # Combine base and labeled data
         all_texts = base_texts + labeled_texts
@@ -1032,9 +1045,9 @@ def combined_sentiment_analysis(text_series):
         )
         
         # Adjust thresholds for TikTok content which tends to be more polarized
-        if final_score >= 0.05:
+        if final_score >= 0.10:  # Raise positive threshold
             results.append(f"Positive ({final_score:.2f})")
-        elif final_score <= -0.05:
+        elif final_score <= -0.03:  # Lower negative threshold
             results.append(f"Negative ({final_score:.2f})")
         else:
             results.append(f"Neutral ({final_score:.2f})")
@@ -1124,8 +1137,8 @@ def enhanced_sentiment_analysis(text_series):
             weights = {
                 'mnb': 0.5,       # MNB still gets majority weight
                 'emoji': 0.1,     # Small contribution from emojis
-                'lexicon': 0.3,    # Small contribution from lexicon
-                'vader' : 0.1
+                'lexicon': 0.2,    # Small contribution from lexicon
+                'vader' : 0.2
             }
             
             # Convert mnb_category to score for weighted calculation
@@ -1144,9 +1157,9 @@ def enhanced_sentiment_analysis(text_series):
             )
             
             # Determine sentiment category
-            if final_score >= 0.05:
+            if final_score >= 0.10:  # Raise positive threshold
                 results.append(f"Positive ({final_score:.2f})")
-            elif final_score <= -0.05:
+            elif final_score <= -0.03:  # Lower negative threshold
                 results.append(f"Negative ({final_score:.2f})")
             else:
                 results.append(f"Neutral ({final_score:.2f})")
@@ -1158,6 +1171,7 @@ def enhanced_sentiment_analysis(text_series):
         return results[0]
     
     return pd.Series(results)
+
 
 # Function to get sentiment scores breakdown
 def get_sentiment_breakdown(text):
