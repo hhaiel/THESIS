@@ -990,20 +990,28 @@ if page == "Upload Data":
                     
                     # Hashtag analysis
                     st.subheader("Hashtag Analysis")
-                    all_hashtags = [tag for tags in comments_df['Hashtags'] for tag in tags]
-                    if all_hashtags:
-                        hashtag_counter = Counter(all_hashtags)
-                        top_hashtags = hashtag_counter.most_common(15)
-                        
-                        hashtag_df = pd.DataFrame(top_hashtags, columns=['Hashtag', 'Count'])
-                        
-                        # Create horizontal bar chart for hashtags
-                        fig, ax = plt.subplots(figsize=(10, 8))
-                        sns.barplot(y=hashtag_df['Hashtag'], x=hashtag_df['Count'], ax=ax, orient='h')
-                        ax.set_title('Top 15 Hashtags')
-                        st.pyplot(fig)
-                    else:
-                        st.info("No hashtags found in the comments.")
+                    # Extract hashtags if not already present
+                    if 'Hashtags' not in comments_df.columns:
+                        comments_df['Hashtags'] = comments_df['Comment'].apply(extract_hashtags)
+                    
+                    try:
+                        all_hashtags = [tag for tags in comments_df['Hashtags'] for tag in tags]
+                        if all_hashtags:
+                            hashtag_counter = Counter(all_hashtags)
+                            top_hashtags = hashtag_counter.most_common(15)
+                            
+                            hashtag_df = pd.DataFrame(top_hashtags, columns=['Hashtag', 'Count'])
+                            
+                            # Create horizontal bar chart for hashtags
+                            fig, ax = plt.subplots(figsize=(10, 8))
+                            sns.barplot(y=hashtag_df['Hashtag'], x=hashtag_df['Count'], ax=ax, orient='h')
+                            ax.set_title('Top 15 Hashtags')
+                            st.pyplot(fig)
+                        else:
+                            st.info("No hashtags found in the comments.")
+                    except Exception as e:
+                        st.warning(f"Could not analyze hashtags: {str(e)}")
+                        st.info("No hashtag analysis available.")
                 with tab5:
                         st.header("Market Trend Analysis")
     
@@ -1310,21 +1318,28 @@ elif page == "Fetch TikTok Comments":
                         
                         # Hashtag analysis
                         st.subheader("Hashtag Analysis")
-                        all_hashtags = [tag for tags in comments_df['Hashtags'] for tag in tags]
-                        if all_hashtags:
-                            hashtag_counter = Counter(all_hashtags)
-                            top_hashtags = hashtag_counter.most_common(15)
-                            
-                            hashtag_df = pd.DataFrame(top_hashtags, columns=['Hashtag', 'Count'])
-                            
-                            # Create horizontal bar chart for hashtags
-                            fig, ax = plt.subplots(figsize=(10, 8))
-                            sns.barplot(y=hashtag_df['Hashtag'], x=hashtag_df['Count'], ax=ax, orient='h')
-                            ax.set_title('Top 15 Hashtags')
-                            st.pyplot(fig)
-                    
-                        else:
-                            st.info("No hashtags found in the comments.")
+                        # Extract hashtags if not already present
+                        if 'Hashtags' not in comments_df.columns:
+                            comments_df['Hashtags'] = comments_df['Comment'].apply(extract_hashtags)
+                        
+                        try:
+                            all_hashtags = [tag for tags in comments_df['Hashtags'] for tag in tags]
+                            if all_hashtags:
+                                hashtag_counter = Counter(all_hashtags)
+                                top_hashtags = hashtag_counter.most_common(15)
+                                
+                                hashtag_df = pd.DataFrame(top_hashtags, columns=['Hashtag', 'Count'])
+                                
+                                # Create horizontal bar chart for hashtags
+                                fig, ax = plt.subplots(figsize=(10, 8))
+                                sns.barplot(y=hashtag_df['Hashtag'], x=hashtag_df['Count'], ax=ax, orient='h')
+                                ax.set_title('Top 15 Hashtags')
+                                st.pyplot(fig)
+                            else:
+                                st.info("No hashtags found in the comments.")
+                        except Exception as e:
+                            st.warning(f"Could not analyze hashtags: {str(e)}")
+                            st.info("No hashtag analysis available.")
                     with tab5:
                         st.header("Market Trend Analysis")
     
