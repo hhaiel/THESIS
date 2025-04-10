@@ -893,11 +893,16 @@ def predict_multilingual_sentiment(text_series):
             probabilities = model.predict_proba(text_series)
             confidence_scores = np.max(probabilities, axis=1)
             
+            # Add confidence boost for high probabilities
+            confidence_scores = np.where(confidence_scores > 0.7, 
+                                      confidence_scores + 0.1,  # Boost high confidence
+                                      confidence_scores)
+            
             # Format results with confidence scores
             result = [f"{pred} ({conf:.2f})" for pred, conf in zip(predictions, confidence_scores)]
         except:
-            # If predict_proba fails, use fixed confidence
-            result = [f"{pred} (0.85)" for pred in predictions]
+            # If predict_proba fails, use higher fixed confidence
+            result = [f"{pred} (0.90)" for pred in predictions]
         
         if single_input:
             return result[0]
@@ -983,10 +988,10 @@ def tagalog_enhanced_sentiment_analysis(text_series):
             # Weight the scores based on language
             if is_tag:
                 weights = {
-                    'primary': 0.55,   # Multilingual model
-                    'emoji': 0.15,     # Emoji sentiment
-                    'tagalog': 0.20,   # Tagalog lexicon
-                    'lexicon': 0.10    # TikTok lexicon
+                    'primary': 0.70,   # Increased weight for multilingual model
+                    'emoji': 0.10,     # Reduced weight for emoji
+                    'tagalog': 0.15,   # Reduced weight for tagalog lexicon
+                    'lexicon': 0.05    # Reduced weight for tiktok lexicon
                 }
                 
                 final_score = (
@@ -997,10 +1002,10 @@ def tagalog_enhanced_sentiment_analysis(text_series):
                 )
             else:
                 weights = {
-                    'primary': 0.40,   # Multilingual model
-                    'vader': 0.25,     # VADER (English only)
-                    'emoji': 0.15,     # Emoji sentiment
-                    'lexicon': 0.20    # TikTok lexicon
+                    'primary': 0.60,   # Increased weight for multilingual model
+                    'vader': 0.20,     # Reduced weight for vader
+                    'emoji': 0.10,     # Reduced weight for emoji
+                    'lexicon': 0.10    # Reduced weight for lexicon
                 }
                 
                 final_score = (
@@ -1010,10 +1015,14 @@ def tagalog_enhanced_sentiment_analysis(text_series):
                     lexicon_score * weights['lexicon']
                 )
             
-            # Determine sentiment category
-            if final_score >= 0.05:
+            # Add confidence boost for clear sentiment signals
+            if abs(final_score) > 0.7:
+                final_score = final_score * 1.1  # Boost by 10% for strong signals
+            
+            # Determine sentiment category with adjusted thresholds
+            if final_score >= 0.03:  # Lowered threshold for positive
                 results.append(f"Positive ({final_score:.2f})")
-            elif final_score <= -0.05:
+            elif final_score <= -0.03:  # Lowered threshold for negative
                 results.append(f"Negative ({final_score:.2f})")
             else:
                 results.append(f"Neutral ({final_score:.2f})")

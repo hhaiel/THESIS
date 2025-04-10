@@ -32,9 +32,15 @@ EMOJI_SENTIMENT = {
     "😍": 1.0,  # heart eyes
     "❤️": 1.0,  # heart
     "😁": 1.0,  # grinning face with smiling eyes
-    "😄": 0.9,  # grinning face with smiling eyes
-    "😃": 0.9,  # grinning face
-    "😀": 0.9,  # grinning face
+    "👍": 0.9,  # thumbs up - increased from 0.7
+    "🔥": 0.9,  # fire - added with high positive score
+    "💯": 0.9,  # hundred points
+    "⭐": 0.8,  # star - increased from 0.2
+    "✨": 0.8,  # sparkles
+    "🙌": 0.9,  # raising hands
+    "👏": 0.8,  # clapping hands - increased from 0.6
+    
+    # Moderately positive
     "🤗": 1.0,  # hugging face
     "🥳": 1.0,  # partying face
     "😇": 1.0,  # smiling face with halo
@@ -46,13 +52,6 @@ EMOJI_SENTIMENT = {
     "😂": 0.7,  # face with tears of joy
     "😆": 0.7,  # grinning squinting face
     "😅": 0.6,  # grinning face with sweat
-    
-    # Moderately positive
-    "👍": 0.7,  # thumbs up
-    "👏": 0.6,  # clapping hands
-    "🤩": 0.9,  # star-struck
-    "😎": 0.6,  # smiling face with sunglasses
-    "💪": 0.7,  # flexed biceps
     
     # Slightly positive
     "👌": 0.4,  # OK hand
@@ -67,7 +66,6 @@ EMOJI_SENTIMENT = {
     "🙄": -0.1,  # face with rolling eyes
     "😶": 0.0,  # face without mouth
     "🤷": 0.0,  # person shrugging
-    "⭐": 0.2,  # star
     "📱": 0.0,  # mobile phone
     "📸": 0.1,  # camera with flash
     "🎵": 0.1,  # musical note
@@ -720,10 +718,37 @@ def train_with_labeled_data():
         print(f"Error training with labeled data: {e}")
         return None
 
+# Add profanity lexicon after FILIPINO_LEXICON
+PROFANITY_LEXICON = {
+    # Severe slurs and hate speech (extremely negative scores)
+    'nigger': -1.0, 'nigga': -1.0, 'faggot': -1.0, 'fag': -1.0,
+    'retard': -1.0, 'retarded': -1.0, 'spastic': -1.0, 'tranny': -1.0,
+    'chink': -1.0, 'gook': -1.0, 'wetback': -1.0, 'beaner': -1.0,
+    'kike': -1.0, 'dyke': -1.0, 'homo': -1.0, 'paki': -1.0,
+    
+    # Strong negative words and slurs (very negative scores)
+    'fucking': -0.9, 'fuck': -0.9, 'shit': -0.8, 'bullshit': -0.9,
+    'crap': -0.7, 'damn': -0.7, 'goddamn': -0.8, 'ass': -0.7,
+    'asshole': -0.9, 'bitch': -0.9, 'bastard': -0.9, 'stupid': -0.8,
+    'idiot': -0.8, 'moron': -0.8, 'dumb': -0.8,
+    'awful': -0.8, 'terrible': -0.8, 'horrible': -0.8, 'pathetic': -0.8,
+    'disgusting': -0.9, 'gross': -0.7, 'nasty': -0.8, 'wtf': -0.8,
+    'stfu': -0.9, 'kys': -0.9, 'kms': -0.9, 'ffs': -0.8,
+    'garbage': -0.8, 'trash': -0.8, 'rubbish': -0.7, 'worthless': -0.9,
+    'useless': -0.8, 'dogshit': -0.9, 'horseshit': -0.9, 'dipshit': -0.9,
+    'dumbass': -0.9, 'jackass': -0.8, 'piece of shit': -0.9,
+    
+    # Intensifiers that strengthen negative sentiment
+    'so': -0.2, 'very': -0.2, 'really': -0.2, 'totally': -0.2,
+    'completely': -0.2, 'absolutely': -0.2, 'utterly': -0.2,
+    'literally': -0.2, 'fucking': -0.3, 'super': -0.2
+}
+
 # Advanced lexicon-based sentiment with TikTok-specific terms
 def analyze_lexicon_sentiment(text, language=None):
     """
     Analyze sentiment using TikTok and Filipino-specific lexicon.
+    Now with enhanced profanity detection and intensifier handling.
     
     Args:
         text: Text to analyze
@@ -734,7 +759,6 @@ def analyze_lexicon_sentiment(text, language=None):
     
     # Detect language if not provided
     if language is None:
-        # Use the detect_language function
         language = detect_language(text)
     
     text = text.lower()
@@ -745,40 +769,62 @@ def analyze_lexicon_sentiment(text, language=None):
     
     total_score = 0
     count = 0
+    intensifier_count = 0
+    severe_slur_found = False
     
-    # Initialize lexicons with a default
-    lexicons = [TIKTOK_LEXICON, FILIPINO_LEXICON]
+    # Initialize lexicons with a default order
+    lexicons = [PROFANITY_LEXICON, TIKTOK_LEXICON, FILIPINO_LEXICON]  # Prioritize profanity detection
     
     # Then modify the order based on detected language
     if language == 'tl':
-        # Filipino content - check Filipino lexicon first, then TikTok
-        lexicons = [FILIPINO_LEXICON, TIKTOK_LEXICON]
+        lexicons = [PROFANITY_LEXICON, FILIPINO_LEXICON, TIKTOK_LEXICON]
     elif language == 'mixed':
-        # Taglish content - check both lexicons with equal priority
-        lexicons = [FILIPINO_LEXICON, TIKTOK_LEXICON]
-    # Default for 'en' or 'unknown' is already set above
+        lexicons = [PROFANITY_LEXICON, FILIPINO_LEXICON, TIKTOK_LEXICON]
     
     # Check for words in the appropriate lexicons
     for word in words:
-        for lexicon in lexicons:
-            if word in lexicon:
-                total_score += lexicon[word]
-                count += 1
-                break  # Found in one lexicon, no need to check the other
-    
-    # Check for phrases
-    for phrase in bigrams:
-        for lexicon in lexicons:
-            if phrase in lexicon:
-                total_score += lexicon[phrase]
-                count += 1
-                break
+        word_score = 0
+        word_found = False
+        
+        # Check for severe slurs first
+        if word in PROFANITY_LEXICON and PROFANITY_LEXICON[word] == -1.0:
+            severe_slur_found = True
+            word_score = -1.0
+            word_found = True
+        else:
+            for lexicon in lexicons:
+                if word in lexicon:
+                    word_score = lexicon[word]
+                    word_found = True
+                    
+                    # Count intensifiers
+                    if word in PROFANITY_LEXICON and abs(PROFANITY_LEXICON[word]) <= 0.3:
+                        intensifier_count += 1
+                    break
+        
+        if word_found:
+            total_score += word_score
+            count += 1
     
     # If no sentiment words were found
     if count == 0:
         return 0.0
-        
-    return total_score / count
+    
+    # Calculate base score
+    base_score = total_score / count
+    
+    # If a severe slur was found, ensure the score is maximally negative
+    if severe_slur_found:
+        return -1.0
+    
+    # Apply intensifier effect
+    if intensifier_count > 0 and base_score < 0:
+        # Strengthen negative sentiment based on number of intensifiers
+        intensifier_multiplier = 1.0 + (0.2 * min(intensifier_count, 3))  # Cap at 3 intensifiers
+        base_score *= intensifier_multiplier
+    
+    # Ensure the score stays within [-1, 1]
+    return max(-1.0, min(1.0, base_score))
 
 # Generate enhanced training data for ML models
 def generate_training_data():
@@ -978,6 +1024,7 @@ def train_mnb_model(text_series):
 def combined_sentiment_analysis(text_series):
     """
     Combines multiple sentiment analysis techniques for improved accuracy.
+    Enhanced to better handle positive emojis and exclamation marks.
     
     Args:
         text_series: Pandas Series containing text
@@ -998,50 +1045,64 @@ def combined_sentiment_analysis(text_series):
             results.append("Neutral (0.00)")
             continue
         
-        # Process text - this now includes language detection
+        # Process text and detect language
         processed = preprocess_for_sentiment(text)
-        detected_language = processed['language']  # Get the detected language
+        detected_language = processed['language']
         
         # Get VADER sentiment
-        sid = SentimentIntensityAnalyzer()
-        vader_scores = sid.polarity_scores(text)
+        vader_scores = SentimentIntensityAnalyzer().polarity_scores(text)
         vader_compound = vader_scores['compound']
         
-        # Extract emojis
-        emojis_found = processed['emojis']
-        
-        # Get emoji sentiment if emojis exist
+        # Get emoji sentiment with higher weight for positive emojis
         emoji_score = 0
-        if emojis_found:
-            emoji_score = analyze_emoji_sentiment(emojis_found)
+        if processed['emojis']:
+            emoji_score = analyze_emoji_sentiment(processed['emojis'])
+            # Boost positive emoji score
+            if emoji_score > 0:
+                emoji_score *= 1.2  # 20% boost for positive emojis
         
-        # Get TikTok lexicon sentiment - pass the detected language
+        # Get lexicon sentiment
         lexicon_score = analyze_lexicon_sentiment(text, detected_language)
         
-        # Weight the scores
+        # Count exclamation marks - they often indicate positive sentiment
+        exclamation_count = text.count('!')
+        exclamation_boost = min(0.2, exclamation_count * 0.1)  # Cap at 0.2
+        
+        # Check for positive words
+        positive_words = ['amazing', 'great', 'awesome', 'helpful', 'good', 'love', 'excellent']
+        positive_word_count = sum(1 for word in text.lower().split() if word in positive_words)
+        positive_word_boost = min(0.3, positive_word_count * 0.15)  # Cap at 0.3
+        
+        # Adjust weights based on presence of positive indicators
         weights = {
-            'vader': 0.6,  # VADER has highest weight
-            'emoji': 0.2,  # Emojis are important in TikTok content
-            'lexicon': 0.2  # TikTok-specific lexicon
+            'vader': 0.3,
+            'emoji': 0.3 if emoji_score > 0 else 0.1,  # Increased weight for positive emojis
+            'lexicon': 0.4
         }
         
+        # Calculate final score
         final_score = (
             vader_compound * weights['vader'] +
             emoji_score * weights['emoji'] +
-            lexicon_score * weights['lexicon']
+            lexicon_score * weights['lexicon'] +
+            exclamation_boost +  # Add exclamation mark boost
+            positive_word_boost  # Add positive word boost
         )
         
-        # Adjust thresholds for TikTok content which tends to be more polarized
-        if final_score >= 0.05:
+        # Ensure score stays within bounds
+        final_score = max(-1.0, min(1.0, final_score))
+        
+        # Determine sentiment category with adjusted thresholds
+        if final_score >= 0.05:  # Lower threshold for positive
             results.append(f"Positive ({final_score:.2f})")
-        elif final_score <= -0.05:
+        elif final_score <= -0.1:  # Higher threshold for negative
             results.append(f"Negative ({final_score:.2f})")
         else:
             results.append(f"Neutral ({final_score:.2f})")
     
     if single_input:
         return results[0]
-        
+    
     return pd.Series(results)
 
 # Enhanced sentiment analysis with ensemble approach
@@ -1074,85 +1135,87 @@ def enhanced_sentiment_analysis(text_series):
         clean_text = processed['processed_text']
         language = processed['language']
         
-        # Get the MNB prediction first
+        # Get emoji sentiment first - prioritize positive emojis
+        emoji_score = analyze_emoji_sentiment(processed['emojis']) if processed['emojis'] else 0
+        has_positive_emojis = emoji_score > 0.5
+        
+        # Check for positive indicators
+        exclamation_count = text.count('!')
+        positive_words = ['love', 'great', 'good', 'amazing', 'awesome', 'excellent', 'perfect', 'best']
+        positive_word_count = sum(1 for word in clean_text.split() if word in positive_words)
+        
+        # If we have strong positive indicators, prioritize them
+        if (has_positive_emojis and positive_word_count > 0) or positive_word_count >= 2:
+            score = 0.8 + min(0.2, (positive_word_count * 0.1))  # Base 0.8 plus up to 0.2 for multiple positive words
+            results.append(f"Positive ({score:.2f})")
+            continue
+        
+        # Check for profanity and strong negative words
+        words = clean_text.lower().split()
+        profanity_count = sum(1 for word in words if word in PROFANITY_LEXICON)
+        strong_negative_count = sum(1 for word in words if (word in FILIPINO_LEXICON and FILIPINO_LEXICON[word] <= -0.7) or 
+                                                         (word in TIKTOK_LEXICON and TIKTOK_LEXICON[word] <= -0.7))
+        
+        # If profanity or strong negative words are present, force negative sentiment
+        if profanity_count > 0 or strong_negative_count > 0:
+            score = -0.8 - (0.1 * min(profanity_count + strong_negative_count, 2))
+            results.append(f"Negative ({score:.2f})")
+            continue
+        
+        # Get VADER sentiment
+        vader_scores = SentimentIntensityAnalyzer().polarity_scores(text)
+        vader_compound = vader_scores['compound']
+        
+        # Get lexicon sentiment
+        lexicon_score = analyze_lexicon_sentiment(text, language)
+        
+        # Get the MNB prediction
         mnb_sentiment = train_mnb_model(clean_text)
         
-        # Parse the MNB result to get category and confidence
+        # Parse the MNB result
         mnb_match = re.match(r"(Positive|Negative|Neutral) \(([-+]?\d+\.\d+)\)", mnb_sentiment)
         if mnb_match:
             mnb_category = mnb_match.group(1)
             mnb_confidence = float(mnb_match.group(2))
         else:
-            # If parsing fails, default to neutral
             mnb_category = "Neutral"
             mnb_confidence = 0.5
         
-        # Only make adjustments in specific cases:
-        # 1. When confidence is relatively low (borderline cases)
-        # 2. When strong signals from emojis or lexicon contradict MNB
-        
-        # Check for strong emoji signals
-        emoji_score = 0
-        if processed['emojis']:
-            emoji_score = analyze_emoji_sentiment(processed['emojis'])
-        
-        # Check for strong lexicon signals based on detected language
-        lexicon_score = analyze_lexicon_sentiment(text, language)
-        
-        # Determine if we need to adjust the MNB result
-        make_adjustment = False
-        
-        # Case 1: Low confidence from MNB (borderline case)
-        if mnb_confidence < 0.65:
-            make_adjustment = True
-        
-        # Case 2: Strong contradictory signals from emojis
-        if abs(emoji_score) > 0.7:
-            if (mnb_category == "Positive" and emoji_score < -0.5) or \
-               (mnb_category == "Negative" and emoji_score > 0.5):
-                make_adjustment = True
-        
-        # Case 3: Strong contradictory signals from lexicon
-        if abs(lexicon_score) > 0.7:
-            if (mnb_category == "Positive" and lexicon_score < -0.5) or \
-               (mnb_category == "Negative" and lexicon_score > 0.5):
-                make_adjustment = True
-        
-        # Make adjustments if needed, otherwise return MNB result as is
-        if make_adjustment:
-            # Calculate adjusted score
-            weights = {
-                'mnb': 0.5,       # MNB still gets majority weight
-                'emoji': 0.1,     # Small contribution from emojis
-                'lexicon': 0.3,    # Small contribution from lexicon
-                'vader' : 0.1
-            }
-            
-            # Convert mnb_category to score for weighted calculation
-            if mnb_category == "Positive":
-                mnb_score = mnb_confidence
-            elif mnb_category == "Negative":
-                mnb_score = -mnb_confidence
-            else:
-                mnb_score = 0.0
-            
-            # Calculate weighted final score
-            final_score = (
-                mnb_score * weights['mnb'] +
-                emoji_score * weights['emoji'] +
-                lexicon_score * weights['lexicon']
-            )
-            
-            # Determine sentiment category
-            if final_score >= 0.05:
-                results.append(f"Positive ({final_score:.2f})")
-            elif final_score <= -0.05:
-                results.append(f"Negative ({final_score:.2f})")
-            else:
-                results.append(f"Neutral ({final_score:.2f})")
+        # Convert mnb_category to score
+        if mnb_category == "Positive":
+            mnb_score = mnb_confidence
+        elif mnb_category == "Negative":
+            mnb_score = -mnb_confidence
         else:
-            # Use original MNB result
-            results.append(mnb_sentiment)
+            mnb_score = 0.0
+        
+        # Calculate weighted score with adjusted weights
+        weights = {
+            'mnb': 0.3,      # Reduced MNB weight
+            'vader': 0.3,    # Maintained VADER weight
+            'lexicon': 0.2,  # Maintained lexicon weight
+            'emoji': 0.2     # Increased emoji weight
+        }
+        
+        # Add positive indicators boost
+        positive_boost = min(0.2, (exclamation_count * 0.05) + (positive_word_count * 0.1))
+        
+        # Calculate final score
+        final_score = (
+            mnb_score * weights['mnb'] +
+            vader_compound * weights['vader'] +
+            lexicon_score * weights['lexicon'] +
+            emoji_score * weights['emoji'] +
+            positive_boost
+        )
+        
+        # Determine final sentiment with adjusted thresholds
+        if final_score >= 0.1:  # Lowered threshold for positive
+            results.append(f"Positive ({final_score:.2f})")
+        elif final_score <= -0.15:  # Increased threshold for negative
+            results.append(f"Negative ({final_score:.2f})")
+        else:
+            results.append(f"Neutral ({final_score:.2f})")
     
     if single_input:
         return results[0]
@@ -1264,7 +1327,6 @@ def analyze_for_trolling(text):
     
     # Get sentiment scores
     sentiment_breakdown = get_sentiment_breakdown(text)
-    # Troll comments often have extreme negative sentiment
     sentiment_score = sentiment_breakdown['final']
     
     # Extract emojis from text
@@ -1275,39 +1337,50 @@ def analyze_for_trolling(text):
     if emojis_found:
         emoji_troll_score = analyze_emoji_sentiment_for_trolls(emojis_found)
     
-    # Troll comments often have extreme negative sentiment
-    sentiment_score = sentiment_breakdown['final']
+    # Check for profanity and strong negative words
+    words = text.lower().split()
+    profanity_count = sum(1 for word in words if word in PROFANITY_LEXICON)
+    strong_negative_count = sum(1 for word in words if (word in FILIPINO_LEXICON and FILIPINO_LEXICON[word] <= -0.7) or 
+                                                     (word in TIKTOK_LEXICON and TIKTOK_LEXICON[word] <= -0.7))
     
-    # Higher troll likelihood if extremely negative sentiment
+    # Calculate sentiment-based factors
     sentiment_factor = 0.0
-    if sentiment_score <= -0.7:  # Very negative content - increased from -0.6
-        sentiment_factor = 0.4   # Increased from 0.3
-    elif sentiment_score <= -0.4:  # Moderately negative - increased from -0.3
-        sentiment_factor = 0.2   # Increased from 0.1
-    elif sentiment_score <= -0.2:  # Slightly negative - new bracket
-        sentiment_factor = 0.1   # New level
-    # Check for very short comments with strong negative words
-    words = re.findall(r'\b\w+\b', text.lower())
-    strong_negative_count = sum(1 for word in words if word in FILIPINO_LEXICON 
-                              and FILIPINO_LEXICON[word] <= -0.7)
+    if sentiment_score <= -0.7:
+        sentiment_factor = 0.4
+    elif sentiment_score <= -0.4:
+        sentiment_factor = 0.2
+    elif sentiment_score <= -0.2:
+        sentiment_factor = 0.1
     
-    # (Add this before calculating final_troll_score)
-    is_short_comment = len(text.split()) < 5  # Less than 5 words
-    if is_short_comment and strong_negative_count > 0:
-        additional_factor = 0.2  # Short negative comments are often trolls
+    # Check for very short comments with strong negative words or profanity
+    is_short_comment = len(words) < 5
+    if is_short_comment and (strong_negative_count > 0 or profanity_count > 0):
+        additional_factor = 0.2
     else:
         additional_factor = 0.0
+    
     # Check for excessive formatting
     formatting_score = has_excessive_formatting(text)
-
-    # Add emoji troll factor (weighted at 0.3)
+    
+    # Add emoji troll factor
     emoji_factor = emoji_troll_score * 0.3
+    
+    # Add profanity factor
+    profanity_factor = min(0.4, profanity_count * 0.2)
+    
     # Final troll score combines all factors
     final_troll_score = min(1.0, troll_pattern_score + sentiment_factor + 
-                         additional_factor + emoji_factor + formatting_score)
+                         additional_factor + emoji_factor + formatting_score + profanity_factor)
     
-    # Flag as troll if score exceeds threshold (adjust as needed)
+    # Determine if it's a troll comment
     is_troll = final_troll_score >= 0.3
+    
+    # Important: If the comment contains strong negative words or profanity,
+    # ensure it's classified as negative regardless of other factors
+    if profanity_count > 0 or strong_negative_count > 0:
+        sentiment_breakdown['sentiment'] = "Negative"
+        # Make sentiment score more negative for profanity
+        sentiment_score = min(sentiment_score, -0.7)
     
     return {
         'troll_score': final_troll_score,
