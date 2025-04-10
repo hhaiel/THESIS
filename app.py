@@ -1273,22 +1273,7 @@ elif page == "Fetch TikTok Comments":
                             
                             st.write("\n### Troll Detection")
                             st.write(f"**Is Troll Comment:** {'Yes' if troll_analysis['is_troll'] else 'No'}")
-                            st.write(f"\n**Troll Score:** {troll_analysis['troll_score']:.2f}")
-
-                            # If it's a troll, show warning box with improved colors
-                            if troll_analysis['is_troll']:
-                                st.markdown("""
-                                <div style="background-color: #FF4D4D; padding: 15px; border-radius: 8px; border: 2px solid #CC0000; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                                    <h4 style="color: #FFFFFF; margin-top: 0; font-weight: bold;">⚠️ Troll Comment Detected</h4>
-                                    <p style="color: #FFFFFF; margin-bottom: 10px;">This comment shows characteristics commonly found in trolling behavior:</p>
-                                    <ul style="color: #FFFFFF; margin-bottom: 0; padding-left: 20px;">
-                                        <li>Aggressive or inflammatory language</li>
-                                        <li>Excessive punctuation or capitalization</li>
-                                        <li>Use of insults or derogatory terms</li>
-                                        <li>Potential use of sarcasm or baiting language</li>
-                                    </ul>
-                                </div>
-                                """, unsafe_allow_html=True)
+                            st.write(f"\n**Troll Score:** {troll_analysis['troll_score']:.2f} (Higher values indicate more troll-like behavior)")
                     
                     with tab4:
                         # Statistics
@@ -1427,65 +1412,58 @@ elif page == "Sentiment Explorer":
             st.write(f"**Original:** {test_comment}")
             st.write(f"**Cleaned:** {processed['cleaned_text']}")
             st.write(f"**Emojis Found:** {processed['emojis'] or 'None'}")
+            st.write(f"**Demojized:** {processed['demojized']}")
+            
+            # Language detection
+            is_tag = is_tagalog(test_comment)
+            st.write(f"**Detected Language:** {'Tagalog' if is_tag else 'English'}")
+            
+            # Extract and display hashtags
+            hashtags = extract_hashtags(test_comment)
+            if hashtags:
+                st.write(f"**Hashtags:** {', '.join(hashtags)}")
             
             # Perform sentiment analysis
-            vader_result = analyze_sentiment_vader(processed['demojized'])
-            mnb_result = train_mnb_model(processed['cleaned_text'])
-            combined_result = combined_sentiment_analysis(processed['demojized'])
+            vader_sentiment = analyze_sentiment_vader(processed['demojized'])
+            combined_sentiment = combined_sentiment_analysis(processed['demojized'])
+            full_analysis = analyze_comment_with_trolling(test_comment, language_mode)
+            enhanced_sentiment = full_analysis['sentiment_text']
             
-            # Get troll analysis
-            troll_analysis = analyze_for_trolling(test_comment)
-            
-            # Display sentiment results in the correct order
-            st.subheader("Sentiment Analysis Results")
-            st.write(f"**VADER:** {vader_result}")
-            st.write(f"**MNB:** {mnb_result}")
-            st.write(f"**Combined:** {combined_result}")
-            
-            # Display troll detection results
+            # Display sentiment results
+            st.subheader("Sentiment Analysis")
+            st.write(f"**VADER:** {vader_sentiment}")
+            st.write(f"**Combined:** {combined_sentiment}")
+            st.write(f"**Enhanced (with language detection):** {enhanced_sentiment}")
             st.subheader("Troll Detection")
-            st.write(f"**Is Troll Comment:** {'Yes' if troll_analysis['is_troll'] else 'No'}")
-            st.write(f"**Troll Score:** {troll_analysis['troll_score']:.2f}")
-
-            # If it's a troll, show warning box with improved colors
-            if troll_analysis['is_troll']:
-                st.markdown("""
-                <div style="background-color: #FF4D4D; padding: 15px; border-radius: 8px; border: 2px solid #CC0000; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                    <h4 style="color: #FFFFFF; margin-top: 0; font-weight: bold;">⚠️ Troll Comment Detected</h4>
-                    <p style="color: #FFFFFF; margin-bottom: 10px;">This comment shows characteristics commonly found in trolling behavior:</p>
-                    <ul style="color: #FFFFFF; margin-bottom: 0; padding-left: 20px;">
-                        <li>Aggressive or inflammatory language</li>
-                        <li>Excessive punctuation or capitalization</li>
-                        <li>Use of insults or derogatory terms</li>
-                        <li>Potential use of sarcasm or baiting language</li>
-                    </ul>
-                </div>
-                """, unsafe_allow_html=True)
+            st.write(f"**Is Troll Comment:** {'Yes' if full_analysis['is_troll'] else 'No'}")
+            st.write(f"**Troll Score:** {full_analysis['troll_score']:.2f} (Higher values indicate more troll-like behavior)")
         
         with col2:
             # Display sentiment breakdown
             st.subheader("Sentiment Breakdown")
-            breakdown = get_sentiment_breakdown(test_comment)
+            breakdown = get_sentiment_breakdown_with_language(test_comment, language_mode)
             breakdown_fig = plot_sentiment_factors(test_comment, breakdown)
             st.plotly_chart(breakdown_fig)
             
             # Add explanation
             st.subheader("How It Works")
             st.write("""
-            Our sentiment analysis combines three main approaches:
+            Our sentiment analysis combines multiple approaches:
             
             1. **VADER** - A rule-based sentiment analyzer specifically tuned for social media
-            2. **MNB (Multinomial Naive Bayes)** - A machine learning model trained on TikTok comments
-            3. **Combined Analysis** - A weighted combination of VADER and MNB, enhanced with emoji analysis
-            
-            Additionally, our system includes troll detection that analyzes:
-            - Comment patterns and language
-            - Use of inflammatory words
-            - Excessive punctuation or capitalization
-            - Known troll behavior patterns
+            2. **ML Model** - A machine learning model trained on TikTok comments
+            3. **Emoji Analysis** - Sentiment extraction from emojis
+            4. **TikTok Lexicon** - Custom dictionary of TikTok-specific terms and slang
             """)
             
-            st.write("The final sentiment is a weighted combination of these methods, optimized for TikTok comments.")
+            # Add Tagalog-specific info if detected
+            if is_tag:
+                st.write("""
+                5. **Tagalog Lexicon** - Custom dictionary for Tagalog words and expressions
+                6. **Multilingual Analysis** - Special handling for code-switching (mixed languages)
+                """)
+            
+            st.write("The final sentiment is a weighted combination of all methods, with language-specific optimizations.")
 
 # Market Trends standalone page
 elif page == "Market Trends":
