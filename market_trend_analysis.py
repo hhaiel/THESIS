@@ -279,7 +279,7 @@ def calculate_market_trend_score(df):
     to ensure the score matches the sentiment distribution.
     
     Args:
-        df (pandas.DataFrame): DataFrame with Enhanced Sentiment column
+        df (pandas.DataFrame): DataFrame with Combined Sentiment column
         
     Returns:
         tuple: (trend_summary dict, updated DataFrame)
@@ -288,7 +288,7 @@ def calculate_market_trend_score(df):
     data = df.copy()
     
     # 1. Extract sentiment scores
-    data['sentiment_value'] = data['Enhanced Sentiment'].apply(
+    data['sentiment_value'] = data['Combined Sentiment'].apply(
         lambda x: 1.0 if 'Positive' in x else (-1.0 if 'Negative' in x else 0.0)
     )
     
@@ -299,7 +299,7 @@ def calculate_market_trend_score(df):
             return float(match.group(1))
         return 0.5  # default if no magnitude found
     
-    data['sentiment_magnitude'] = data['Enhanced Sentiment'].apply(extract_score)
+    data['sentiment_magnitude'] = data['Combined Sentiment'].apply(extract_score)
     
     # 3. Determine purchase intent with stronger baseline for positive
     data['purchase_intent'] = detect_purchase_intent(data['Comment'])
