@@ -41,6 +41,8 @@ import io
 import csv
 import chardet  # You may need to pip install chardet
 import matplotlib.font_manager as fm
+import warnings
+warnings.filterwarnings("ignore", category=UserWarning, module="matplotlib.font_manager")
 
 # Define global data directory
 data_dir = os.path.join(os.path.dirname(__file__), 'data')
@@ -69,7 +71,7 @@ st.caption("Market Trend Classification Dashboard")
 def create_emoji_chart(emoji_counts):
     """Create a horizontal bar chart for emoji counts with proper emoji display."""
     # Set font that supports emojis
-    plt.rcParams['font.family'] = ['Segoe UI Emoji', 'Segoe UI Symbol', 'Apple Color Emoji', 'Noto Color Emoji', 'Noto Emoji']
+    plt.rcParams['font.family'] = ['Segoe UI Emoji', 'Segoe UI Symbol']
     
     # Create figure with higher DPI for better emoji rendering
     fig, ax = plt.subplots(figsize=(10, 6), dpi=150)

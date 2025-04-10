@@ -6,6 +6,7 @@ based on sentiment analysis of social media comments.
 """
 
 import re
+from turtle import st
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -272,250 +273,167 @@ def detect_purchase_intent(text_series):
         results.append(intent_score)
     
     return results
-def calculate_market_trend_score(df):
-    """
-    Calculate a market trend score that predicts buying behavior.
-    EXTREME FIX: Much more aggressive handling of sentiment distributions
-    to ensure the score matches the sentiment distribution.
+
+def calculate_market_trend_score(comments_df):
+    # Create a copy of the dataframe to avoid modifying the original
+    enhanced_df = comments_df.copy()
     
-    Args:
-        df (pandas.DataFrame): DataFrame with Combined Sentiment column
-        
-    Returns:
-        tuple: (trend_summary dict, updated DataFrame)
-    """
-    # Create a working copy
-    data = df.copy()
+    # If purchase_intent isn't already calculated, calculate it
+    if 'purchase_intent' not in enhanced_df.columns:
+        enhanced_df['purchase_intent'] = detect_purchase_intent(enhanced_df['Comment'])
     
-    # 1. Extract sentiment scores
-    data['sentiment_value'] = data['Combined Sentiment'].apply(
-        lambda x: 1.0 if 'Positive' in x else (-1.0 if 'Negative' in x else 0.0)
+    # Extract sentiment scores from Combined Sentiment instead of Enhanced Sentiment
+    # You'll need to adjust this based on how your Combined Sentiment is formatted
+    enhanced_df['sentiment_score'] = enhanced_df['Combined Sentiment'].apply(
+        lambda x: 1 if 'Positive' in x else (-1 if 'Negative' in x else 0)
     )
     
-    # 2. Get sentiment magnitude (extract number in parentheses)
-    def extract_score(text):
-        match = re.search(r'\(([-+]?\d+\.\d+)\)', text)
-        if match:
-            return float(match.group(1))
-        return 0.5  # default if no magnitude found
+    # Calculate positive sentiment ratio
+    positive_count = len(enhanced_df[enhanced_df['sentiment_score'] > 0])
+    positive_sentiment_ratio = positive_count / len(enhanced_df) if len(enhanced_df) > 0 else 0
     
-    data['sentiment_magnitude'] = data['Combined Sentiment'].apply(extract_score)
+    # Calculate purchase intent ratio
+    high_intent_count = len(enhanced_df[enhanced_df['purchase_intent'] > 0.4])
+    purchase_intent_ratio = high_intent_count / len(enhanced_df) if len(enhanced_df) > 0 else 0
     
-    # 3. Determine purchase intent with stronger baseline for positive
-    data['purchase_intent'] = detect_purchase_intent(data['Comment'])
-    
-    # DIRECT APPROACH: Calculate sentiment distribution
-    positive_ratio = (data['sentiment_value'] > 0).mean()
-    negative_ratio = (data['sentiment_value'] < 0).mean()
-    neutral_ratio = (data['sentiment_value'] == 0).mean()
-    
-    # EXTREME FIX: Force the purchase intent to be very high for positive comments
-    # This creates a direct relationship between sentiment and purchase intent
-    for i, row in data.iterrows():
-        if row['sentiment_value'] > 0:
-            data.at[i, 'purchase_intent'] = max(0.7, data.at[i, 'purchase_intent'])
-    
-    # 4. Apply an extremely strong sentiment density multiplier
-    sentiment_density_factor = 1.0 + (positive_ratio - 0.3) * 3.0  # EXTREMELY high weight
-    data['adjusted_purchase_intent'] = data['purchase_intent'] * sentiment_density_factor
-    data['adjusted_purchase_intent'] = data['adjusted_purchase_intent'].clip(0, 1)  # Ensure 0-1 range
-    
-    # 5. Give token calculations for individual scores but primarily use sentiment distribution
-    data['market_trend_score'] = (
-        # Even higher sentiment weight
-        0.85 * data['sentiment_value'] * data['sentiment_magnitude'] +
-        # Greatly reduced intent component
-        0.10 * data['adjusted_purchase_intent'] +
-        # Minimal interaction effect
-        0.05 * (data['sentiment_value'] > 0) * data['adjusted_purchase_intent']
-    )
-    
-    # Scale scores for individual data points, but this won't matter much
-    min_score = data['market_trend_score'].min()
-    max_score = data['market_trend_score'].max()
-    
-    if max_score > min_score:  # Avoid division by zero
-        data['market_trend_score'] = 50 + 50 * (
-            (data['market_trend_score'] - min_score) / (max_score - min_score) * 2 - 1
-        )
+    # Calculate troll-free positive sentiment (if 'Is Troll' column exists)
+    if 'Is Troll' in enhanced_df.columns:
+        troll_free_df = enhanced_df[~enhanced_df['Is Troll']]
+        troll_free_positive = len(troll_free_df[troll_free_df['sentiment_score'] > 0])
+        troll_free_positive_ratio = troll_free_positive / len(troll_free_df) if len(troll_free_df) > 0 else 0
     else:
-        data['market_trend_score'] = 50  # Default to neutral if all scores are the same
+        troll_free_positive_ratio = positive_sentiment_ratio
     
-    # EXTREME FIX: Direct sentiment-based score calculation that ignores other factors
-    # This creates a more direct relationship between sentiment ratios and final score
-    # Positive comments contribute positively, negative comments contribute negatively
-    # Use a baseline of 50 and adjust up or down based on sentiment percentages
-    sentiment_net_score = positive_ratio * 100 - negative_ratio * 40
-    sentiment_based_score = 45 + sentiment_net_score  # Start at 45 and adjust
+    # Calculate overall market trend score (0-100 scale)
+    # Weighted formula: 40% positive sentiment + 40% purchase intent + 20% troll-free positive sentiment
+    overall_score = (
+        positive_sentiment_ratio * 40 + 
+        purchase_intent_ratio * 40 + 
+        troll_free_positive_ratio * 20
+    )
     
-    # Ensure the score is within valid range
-    sentiment_based_score = max(0, min(100, sentiment_based_score))
+    # Scale to 0-100
+    overall_score = min(100, overall_score * 100)
     
-    # EXTREME FIX: Almost completely ignore calculations and use sentiment directly 
-    overall_score = 0.1 * data['market_trend_score'].mean() + 0.9 * sentiment_based_score
+    # Determine trend category
+    if overall_score >= 70:
+        trend_category = "Strong Positive"
+    elif overall_score >= 50:
+        trend_category = "Positive"
+    elif overall_score >= 30:
+        trend_category = "Neutral"
+    elif overall_score >= 10:
+        trend_category = "Negative"
+    else:
+        trend_category = "Strong Negative"
     
-    # Ensure overall score is within valid range
-    overall_score = max(0, min(100, overall_score))
+    # Optional: Calculate viral potential based on engagement metrics
+    # If you have metrics like comment count, like count, etc.
+    # For now, we'll use a simple formula based on sentiment and purchase intent
+    viral_potential = (positive_sentiment_ratio * 0.6 + purchase_intent_ratio * 0.4) * 100
     
-    # Calculate viral potential based on positive sentiment density and purchase intent
-    viral_potential = (positive_ratio * 0.8 + data['adjusted_purchase_intent'].mean() * 0.2) * 100
-    
-    # FALLBACK INSURANCE: If sentiment is net positive, score MUST be at least 55
-    if positive_ratio > negative_ratio and overall_score < 55:
-        overall_score = 55 + (positive_ratio - negative_ratio) * 40
-    
-    # EXTREME SAFETY: If positive sentiment is over 40% and negative is under 20%, 
-    # score CANNOT be negative
-    if positive_ratio > 0.4 and negative_ratio < 0.2:
-        overall_score = max(overall_score, 60)  # Ensure at least "Positive"
-    
-    # FINAL FAILSAFE: For your specific case with 42.5% positive and 11.2% negative
-    # This guarantees a positive score for this distribution
-    if abs(positive_ratio - 0.425) < 0.05 and abs(negative_ratio - 0.112) < 0.05:
-        overall_score = 65  # Force "Positive" category
-    
+    # Create a summary dictionary
     trend_summary = {
-        'overall_score': overall_score,  # Use the sentiment-dominant score
-        'positive_sentiment_ratio': positive_ratio,
-        'negative_sentiment_ratio': negative_ratio,
-        'neutral_sentiment_ratio': neutral_ratio,
-        'purchase_intent_ratio': (data['adjusted_purchase_intent'] > 0.3).mean(),
-        'sentiment_density_factor': sentiment_density_factor,
-        'viral_potential': viral_potential,
-        'trend_category': 'Strong Positive' if overall_score > 75 else
-                          'Positive' if overall_score > 60 else
-                          'Neutral' if overall_score > 40 else
-                          'Negative' if overall_score > 25 else
-                          'Strong Negative',
-        'sentiment_based_score': sentiment_based_score  # Add this for debugging
+        'overall_score': overall_score,
+        'positive_sentiment_ratio': positive_sentiment_ratio,
+        'purchase_intent_ratio': purchase_intent_ratio,
+        'trend_category': trend_category,
+        'viral_potential': viral_potential
     }
     
-    return trend_summary, data
+    return trend_summary, enhanced_df
 
-def plot_market_prediction(data, trend_summary, save_path=None):
-    """
-    Visualize market trend prediction based on sentiment and intent.
+# Then, update the plot_market_prediction function to also use Combined Sentiment
+def plot_market_prediction(enhanced_df, trend_summary):
+    # Create a figure with two subplots
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 6))
     
-    Args:
-        data (pandas.DataFrame): DataFrame with market trend analysis
-        trend_summary (dict): Summary statistics from calculate_market_trend_score
-        save_path (str, optional): Path to save the figure
-        
-    Returns:
-        matplotlib.figure.Figure: The created figure
-    """
-    # Create a figure with multiple components
-    plt.figure(figsize=(12, 10))
+    # Plot 1: Sentiment distribution with Combined Sentiment
+    sentiment_counts = enhanced_df['Combined Sentiment'].apply(
+        lambda x: 'Positive' if 'Positive' in x else ('Negative' if 'Negative' in x else 'Neutral')
+    ).value_counts()
     
-    # 1. Gauge chart for overall market trend score
-    ax1 = plt.subplot2grid((3, 2), (0, 0), colspan=2)
+    colors = ['#2ecc71', '#f1c40f', '#e74c3c']  # Green, Yellow, Red
+    sentiment_colors = [colors[i] for i in range(len(sentiment_counts))]
     
-    # Draw gauge
-    gauge_colors = ['#FF4136', '#FF851B', '#FFDC00', '#2ECC40', '#0074D9']
-    bounds = [0, 25, 40, 60, 75, 100]
-    norm = plt.Normalize(0, 100)
+    wedges, texts, autotexts = ax1.pie(
+        sentiment_counts, 
+        labels=sentiment_counts.index, 
+        autopct='%1.1f%%',
+        startangle=90,
+        colors=sentiment_colors
+    )
     
-    # Draw gauge background
-    for i in range(len(bounds)-1):
-        ax1.add_patch(patches.Wedge(center=(0.5, 0), r=0.4, 
-                                   theta1=180 - bounds[i+1] * 1.8, 
-                                   theta2=180 - bounds[i] * 1.8,
-                                   color=gauge_colors[i], alpha=0.8))
+    # Make text more readable
+    for text in texts + autotexts:
+        text.set_fontsize(10)
+        text.set_color('black')
     
-    # Fix for needle drawing - ensure we're working with a float
-    overall_score = float(trend_summary['overall_score'])
-    needle_angle = 180 - overall_score * 1.8
-    needle_rad = np.radians(needle_angle)
+    ax1.set_title('Sentiment Distribution')
     
-    # Calculate needle endpoint
-    x_end = 0.5 + 0.4 * np.cos(needle_rad)
-    y_end = 0 + 0.4 * np.sin(needle_rad)
+    # Plot 2: Market Trend Score gauge
+    gauge_colors = ['#e74c3c', '#e67e22', '#f1c40f', '#2ecc71', '#27ae60']
+    gauge_positions = [0, 20, 40, 60, 80, 100]
+    ax2.axis('equal')
     
-    # Draw needle as a line
-    ax1.plot([0.5, x_end], [0, y_end], color='black', linewidth=2)
+    # Create color segments
+    for i in range(len(gauge_positions)-1):
+        ax2.barh(
+            0, 
+            gauge_positions[i+1] - gauge_positions[i], 
+            left=gauge_positions[i], 
+            height=0.5, 
+            color=gauge_colors[i],
+            alpha=0.8
+        )
     
-    # Add a small circle at the base of the needle
-    ax1.add_patch(patches.Circle((0.5, 0), 0.02, color='black', zorder=10))
+    # Add needle to indicate score
+    score = trend_summary['overall_score']
+    needle_length = 0.4
+    ax2.arrow(
+        score, 0, 
+        0, needle_length, 
+        head_width=3, 
+        head_length=0.1, 
+        fc='black', 
+        ec='black'
+    )
     
-    # Add gauge labels
-    for i, bound in enumerate(bounds):
-        angle = 180 - bound * 1.8
-        x = 0.5 + 0.45 * np.cos(np.radians(angle))
-        y = 0 + 0.45 * np.sin(np.radians(angle))
-        ax1.text(x, y, str(bound), ha='center', va='center', fontsize=10)
+    # Add score text
+    ax2.text(
+        score, 
+        -0.1, 
+        f"{score:.1f}", 
+        ha='center', 
+        va='center', 
+        fontsize=12, 
+        fontweight='bold'
+    )
     
-    # Add gauge categories
-    categories = ['Strong\nNegative', 'Negative', 'Neutral', 'Positive', 'Strong\nPositive']
-    for i, cat in enumerate(categories):
-        angle = 180 - (bounds[i] + bounds[i+1]) * 0.9
-        x = 0.5 + 0.3 * np.cos(np.radians(angle))
-        y = 0 + 0.3 * np.sin(np.radians(angle))
-        ax1.text(x, y, cat, ha='center', va='center', fontsize=9)
+    # Add category
+    ax2.text(
+        50, 
+        0.6, 
+        trend_summary['trend_category'], 
+        ha='center', 
+        va='center', 
+        fontsize=14, 
+        fontweight='bold'
+    )
     
-    # Add score in the center
-    ax1.text(0.5, -0.15, f"Market Trend Score: {trend_summary['overall_score']:.1f}", 
-             ha='center', va='center', fontsize=14, fontweight='bold')
-    ax1.text(0.5, -0.25, f"Trend Category: {trend_summary['trend_category']}", 
-             ha='center', va='center', fontsize=12)
+    # Set ticks and labels
+    ax2.set_xlim(0, 100)
+    ax2.set_ylim(-0.5, 1)
+    ax2.set_xticks([0, 20, 40, 60, 80, 100])
+    ax2.set_xticklabels(['0', '20', '40', '60', '80', '100'])
+    ax2.set_yticks([])
     
-    ax1.set_xlim(0, 1)
-    ax1.set_ylim(-0.5, 0.5)
-    ax1.axis('off')
-    ax1.set_title('Market Trend Prediction', fontsize=16, pad=20)
+    ax2.set_title('Market Trend Score')
     
-    # 2. Sentiment distribution
-    ax2 = plt.subplot2grid((3, 2), (1, 0))
-    sentiment_counts = (data['sentiment_value'] > 0).sum(), (data['sentiment_value'] == 0).sum(), (data['sentiment_value'] < 0).sum()
-    ax2.pie(sentiment_counts, 
-            labels=['Positive', 'Neutral', 'Negative'],
-            colors=['#2ECC40', '#AAAAAA', '#FF4136'],
-            autopct='%1.1f%%',
-            startangle=90)
-    ax2.set_title('Sentiment Distribution')
-    
-    # 3. Purchase intent distribution
-    ax3 = plt.subplot2grid((3, 2), (1, 1))
-    intent_counts = (data['purchase_intent'] > 0.4).sum(), ((data['purchase_intent'] <= 0.4) & (data['purchase_intent'] > 0.15)).sum(), (data['purchase_intent'] <= 0.15).sum()
-    ax3.pie(intent_counts, 
-            labels=['High Intent', 'Medium Intent', 'Low Intent'],
-            colors=['#0074D9', '#FFDC00', '#DDDDDD'],
-            autopct='%1.1f%%',
-            startangle=90)
-    ax3.set_title('Purchase Intent Distribution')
-    
-    # 4. Sentiment vs. Intent scatter plot
-    ax4 = plt.subplot2grid((3, 2), (2, 0), colspan=2)
-    scatter = ax4.scatter(data['sentiment_value'] * data['sentiment_magnitude'], 
-                         data['purchase_intent'],
-                         c=data['market_trend_score'], 
-                         cmap='RdYlGn',
-                         alpha=0.7)
-    plt.colorbar(scatter, ax=ax4, label='Market Trend Score')
-    ax4.set_xlabel('Sentiment (direction * magnitude)')
-    ax4.set_ylabel('Purchase Intent')
-    ax4.set_title('Sentiment vs Purchase Intent')
-    ax4.grid(True, alpha=0.3)
-    
-    # Add trend line if we have data points
-    if len(data) > 1:
-        try:
-            slope, intercept, r_value, p_value, std_err = linregress(
-                data['sentiment_value'] * data['sentiment_magnitude'], 
-                data['purchase_intent']
-            )
-            x_range = np.linspace(data['sentiment_value'].min(), data['sentiment_value'].max(), 100)
-            ax4.plot(x_range, intercept + slope * x_range, 'r--', 
-                    label=f'Correlation: {r_value:.2f}')
-            ax4.legend()
-        except Exception as e:
-            print(f"Error calculating trend line: {e}")
-    
+    # Adjust layout
     plt.tight_layout()
-    
-    if save_path:
-        plt.savefig(save_path)
-        
-    return plt.gcf()
+    return fig
+
 def predict_purchase_volume(trend_summary, baseline_volume=1000):
     """
     Enhanced model to estimate potential purchase volume based on sentiment, intent and viral potential.
@@ -604,115 +522,115 @@ def predict_purchase_volume(trend_summary, baseline_volume=1000):
     
     return prediction
 
-def generate_market_trend_report(data, product_name, prediction):
-    """
-    Generate a comprehensive market trend report for a product.
+def generate_market_trend_report(enhanced_df, product_name, prediction):
+    # Extract sentiment distribution
+    sentiment_counts = enhanced_df['Combined Sentiment'].apply(
+        lambda x: 'Positive' if 'Positive' in x else ('Negative' if 'Negative' in x else 'Neutral')
+    ).value_counts()
     
-    Args:
-        data (pandas.DataFrame): DataFrame with market trend analysis
-        product_name (str): Name of the product
-        prediction (dict): Dictionary from predict_purchase_volume
-        
-    Returns:
-        str: Formatted report
-    """
-    # Format the report - fixed by removing duplicated sections
+    # Calculate percentages
+    total = sentiment_counts.sum()
+    positive_pct = sentiment_counts.get('Positive', 0) / total * 100 if total > 0 else 0
+    neutral_pct = sentiment_counts.get('Neutral', 0) / total * 100 if total > 0 else 0
+    negative_pct = sentiment_counts.get('Negative', 0) / total * 100 if total > 0 else 0
+    
+    # Generate the report
     report = f"""
-# Market Trend Analysis for {product_name}
-**Report Generated:** {datetime.now().strftime('%Y-%m-%d %H:%M')}
+# Market Analysis Report for {product_name}
 
 ## Executive Summary
-Based on sentiment analysis of {len(data)} comments, {product_name} shows a **{prediction['trend_category']}** market trend with a score of **{prediction['trend_score']:.1f}** out of 100.
+Based on analysis of {total} comments, the market sentiment for {product_name} is **{sentiment_counts.idxmax()}** ({sentiment_counts.max() / total * 100:.1f}%).
 
-- **Positive Sentiment:** {prediction['positive_sentiment_ratio']*100:.1f}% of comments
-- **Purchase Intent:** {prediction['purchase_intent_ratio']*100:.1f}% of comments show purchase intent
-- **Predicted Sales Volume:** {prediction['predicted_volume']:.0f} units (±{prediction['confidence_margin']:.0f})
+## Sentiment Analysis
+- **Positive**: {positive_pct:.1f}%
+- **Neutral**: {neutral_pct:.1f}%
+- **Negative**: {negative_pct:.1f}%
 
-## Sentiment Breakdown
-- Positive comments: {(data['sentiment_value'] > 0).sum()} ({(data['sentiment_value'] > 0).mean()*100:.1f}%)
-- Neutral comments: {(data['sentiment_value'] == 0).sum()} ({(data['sentiment_value'] == 0).mean()*100:.1f}%)
-- Negative comments: {(data['sentiment_value'] < 0).sum()} ({(data['sentiment_value'] < 0).mean()*100:.1f}%)
-
-## Purchase Intent Analysis
-- High intent (>40%): {(data['purchase_intent'] > 0.4).sum()} comments
-- Medium intent (15-40%): {((data['purchase_intent'] <= 0.4) & (data['purchase_intent'] > 0.15)).sum()} comments
-- Low intent (<15%): {(data['purchase_intent'] <= 0.15).sum()} comments
+## Purchase Intent
+- **High Intent Comments**: {len(enhanced_df[enhanced_df['purchase_intent'] > 0.7])} ({len(enhanced_df[enhanced_df['purchase_intent'] > 0.7]) / total * 100:.1f}%)
+- **Medium Intent Comments**: {len(enhanced_df[(enhanced_df['purchase_intent'] > 0.4) & (enhanced_df['purchase_intent'] <= 0.7)])} ({len(enhanced_df[(enhanced_df['purchase_intent'] > 0.4) & (enhanced_df['purchase_intent'] <= 0.7)]) / total * 100:.1f}%)
+- **Low Intent Comments**: {len(enhanced_df[enhanced_df['purchase_intent'] <= 0.4])} ({len(enhanced_df[enhanced_df['purchase_intent'] <= 0.4]) / total * 100:.1f}%)
 
 ## Sales Prediction
-With a baseline volume of {prediction['baseline_volume']} units:
-- Expected market multiplier: {prediction['trend_multiplier']:.2f}x
-- Predicted sales volume: {prediction['predicted_volume']:.0f} units
-- Prediction range: {prediction['min_prediction']:.0f} to {prediction['max_prediction']:.0f} units
+- **Baseline Monthly Volume**: {prediction['baseline_volume']} units
+- **Predicted Volume**: {prediction['predicted_volume']:.0f} units
+- **Prediction Range**: {prediction['min_prediction']:.0f} to {prediction['max_prediction']:.0f} units
 
 ## Key Insights
 """
     
-    # Add insights based on the data
-    if prediction['trend_score'] > 75:
-        report += "- Strong positive sentiment indicates excellent market reception\n"
-        report += "- High purchase intent suggests strong sales potential\n"
-        report += "- Consider increasing inventory to meet expected demand\n"
-    elif prediction['trend_score'] > 60:
-        report += "- Positive market reception with good purchase intent\n"
-        report += "- Product is likely to perform well in the market\n"
-        report += "- Regular inventory levels should be sufficient\n"
-    elif prediction['trend_score'] > 40:
-        report += "- Neutral market reception with mixed signals\n"
-        report += "- Moderate sales performance expected\n"
-        report += "- Consider product improvements to boost sentiment\n"
+    # Add insights based on analysis
+    # Sentiment insights
+    if positive_pct > 70:
+        report += "- Very strong positive sentiment indicates high market enthusiasm\n"
+    elif positive_pct > 50:
+        report += "- Overall positive sentiment suggests favorable market reception\n"
+    elif negative_pct > 50:
+        report += "- High negative sentiment indicates potential market concerns\n"
+    
+    # Purchase intent insights
+    high_intent_ratio = len(enhanced_df[enhanced_df['purchase_intent'] > 0.7]) / total if total > 0 else 0
+    if high_intent_ratio > 0.3:
+        report += "- Strong purchase intent signals potential high conversion rates\n"
+    elif high_intent_ratio < 0.1:
+        report += "- Low purchase intent may require stronger call-to-action marketing\n"
+    
+    # Compare prediction to baseline
+    prediction_change = (prediction['predicted_volume'] - prediction['baseline_volume']) / prediction['baseline_volume'] * 100
+    if prediction_change > 20:
+        report += f"- Projected sales increase of {prediction_change:.1f}% indicates strong growth potential\n"
+    elif prediction_change > 0:
+        report += f"- Modest projected sales increase of {prediction_change:.1f}% suggests stable market performance\n"
     else:
-        report += "- Negative market reception with low purchase intent\n"
-        report += "- Below average sales performance expected\n"
-        report += "- Product improvements or repositioning recommended\n"
+        report += f"- Projected sales decrease of {abs(prediction_change):.1f}% indicates potential challenges ahead\n"
     
-    # Add sample comments
-    report += "\n## Sample Comments\n"
+    # Add sample high intent comments
+    high_intent_comments = enhanced_df[enhanced_df['purchase_intent'] > 0.7].sort_values('purchase_intent', ascending=False)
+    if not high_intent_comments.empty:
+        report += "\n## Sample High Intent Comments\n"
+        for i, (_, row) in enumerate(high_intent_comments.head(3).iterrows()):
+            report += f"{i+1}. \"{row['Comment']}\" - Intent Score: {row['purchase_intent']:.2f}\n"
     
-    # Add positive comments with high intent
-    high_value_mask = (data['sentiment_value'] > 0) & (data['purchase_intent'] > 0.4)
-    if high_value_mask.any():
-        high_value_comments = data[high_value_mask].sort_values('market_trend_score', ascending=False)['Comment'].head(3)
-        report += "\n### High-Value Positive Comments (with purchase intent)\n"
-        for i, comment in enumerate(high_value_comments):
-            report += f"{i+1}. \"{comment}\"\n"
+    # Add recommendations section
+    report += "\n## Recommendations\n"
     
-    # Add negative comments
-    negative_mask = data['sentiment_value'] < 0
-    if negative_mask.any():
-        negative_comments = data[negative_mask].sort_values('sentiment_value')['Comment'].head(3)
-        report += "\n### Key Negative Comments\n"
-        for i, comment in enumerate(negative_comments):
-            report += f"{i+1}. \"{comment}\"\n"
+    if positive_pct > 60 and high_intent_ratio > 0.2:
+        report += "- Capitalize on positive sentiment with targeted conversion campaigns\n"
+        report += "- Consider slight price premium to maximize revenue\n"
+    elif positive_pct > 40:
+        report += "- Highlight positive aspects in marketing to strengthen perception\n"
+        report += "- Address neutral sentiment with more compelling product benefits\n"
+    else:
+        report += "- Address negative sentiment points in product development\n"
+        report += "- Consider promotional pricing to overcome market hesitation\n"
+    
+    # Add general recommendations
+    report += "- Monitor sentiment trends over time for long-term strategy adjustment\n"
+    report += "- Target high-intent segments with special offers to maximize conversion\n"
     
     return report
+    
+    
 # Add the Streamlit integration function
 def add_market_trends_tab(comments_df, key_prefix=""):
-    """
-    Add a market trends tab to analyze purchase intent and market predictions.
-    
-    Args:
-        comments_df (pandas.DataFrame): DataFrame with comment data
-        key_prefix (str): Optional prefix for widget keys to avoid duplicates
-    """
-    import streamlit as st
-    import plotly.express as px
-    import plotly.graph_objects as go
-    
-    st.header("Market Trend Analysis")
-    
     # Get baseline purchase volume
     col1, col2 = st.columns(2)
     baseline_volume = col1.number_input(
         "Baseline monthly sales volume:", 
         min_value=100, 
-        value=1000,
-        key=f"{key_prefix}baseline_volume"  # Use the prefix
+        value=1000, 
+        key=f"{key_prefix}baseline_volume"
     )
     product_name = col2.text_input(
         "Product name:", 
-        value="TikTok Product",
-        key=f"{key_prefix}product_name"  # Use the prefix 
+        value="TikTok Product", 
+        key=f"{key_prefix}product_name"
     )
+    
+    # Calculate purchase intent for each comment
+    with st.spinner("Calculating purchase intent..."):
+        if 'purchase_intent' not in comments_df.columns:
+            comments_df['purchase_intent'] = detect_purchase_intent(comments_df['Comment'])
     
     # Calculate market trend scores
     with st.spinner("Calculating market trends..."):
@@ -723,183 +641,42 @@ def add_market_trends_tab(comments_df, key_prefix=""):
     st.subheader("Market Trend Overview")
     col1, col2, col3, col4 = st.columns(4)
     col1.metric("Market Trend Score", f"{trend_summary['overall_score']:.1f}/100", 
-                trend_summary['trend_category'])
+        trend_summary['trend_category'])
     col2.metric("Positive Sentiment", f"{trend_summary['positive_sentiment_ratio']*100:.1f}%")
     col3.metric("Purchase Intent", f"{trend_summary['purchase_intent_ratio']*100:.1f}%")
     col4.metric("Viral Potential", f"{trend_summary.get('viral_potential', 0):.1f}%")
     
-    # Display sales prediction
-    st.subheader("Sales Prediction")
-    
-    # Create a gauge chart for sales prediction
-    fig = go.Figure(go.Indicator(
-        mode = "gauge+number",
-        value = prediction['predicted_volume'],
-        title = {'text': "Predicted Sales Volume"},
-        gauge = {
-            'axis': {'range': [0, prediction['max_prediction'] * 1.2]},
-            'bar': {'color': "#2ECC40"},
-            'steps': [
-                {'range': [0, prediction['min_prediction']], 'color': "#FFDC00"},
-                {'range': [prediction['min_prediction'], prediction['max_prediction']], 'color': "#2ECC40"}
-            ],
-            'threshold': {
-                'line': {'color': "red", 'width': 4},
-                'thickness': 0.75,
-                'value': baseline_volume
-            }
-        }
-    ))
-    
-    fig.update_layout(height=300)
-    st.plotly_chart(fig, use_container_width=True)
-    
-    # Display prediction metrics
-    col1, col2, col3 = st.columns(3)
-    col1.metric("Baseline Volume", f"{baseline_volume:,} units")
-    col1.metric("Enhanced Multiplier", f"{prediction.get('enhanced_multiplier', prediction['trend_multiplier']):.2f}x", 
-               f"{(prediction.get('enhanced_multiplier', prediction['trend_multiplier'])-1)*100:.1f}%")
-    
-    col2.metric("Predicted Volume", f"{prediction['predicted_volume']:.0f} units")
-    col2.metric("Confidence Range", f"±{prediction['confidence_margin']:.0f} units", 
-                f"{prediction['min_prediction']:.0f} - {prediction['max_prediction']:.0f}")
-    
-    # Add growth projections if available
-    if 'growth_projection' in prediction:
-        growth = prediction['growth_projection']
-        col3.metric("Forecasted Growth", "3-Month Projection")
-        for month, value in growth.items():
-            month_num = int(month.split('_')[1])
-            change = (value - prediction['predicted_volume']) / prediction['predicted_volume'] * 100
-            col3.metric(f"Month {month_num}", f"{value:.0f} units", f"{change:+.1f}%")
-    
-    # Purchase intent analysis
-    st.subheader("Purchase Intent Analysis")
-    
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        # Create a histogram of purchase intent scores
-        fig = px.histogram(enhanced_df, x='purchase_intent', 
-                         nbins=20, 
-                         title="Distribution of Purchase Intent Scores",
-                         color_discrete_sequence=['#0074D9'])
-        fig.update_layout(xaxis_title="Purchase Intent Score", yaxis_title="Number of Comments")
-        st.plotly_chart(fig, use_container_width=True)
-    
-    with col2:
-        # Intent vs sentiment heatmap with UPDATED thresholds
-        intent_bins = [0, 0.15, 0.4, 1.0]  # Lower thresholds to capture subtle intent
-        intent_labels = ['Low', 'Medium', 'High']
-        sentiment_bins = [-1.01, -0.3, 0.3, 1.01]  # Using -1.01 and 1.01 to include -1 and 1
-        sentiment_labels = ['Negative', 'Neutral', 'Positive']
-        
-        enhanced_df['intent_category'] = pd.cut(enhanced_df['purchase_intent'], bins=intent_bins, labels=intent_labels)
-        enhanced_df['sentiment_category'] = pd.cut(enhanced_df['sentiment_value'], bins=sentiment_bins, labels=sentiment_labels)
-        
-        heat_data = pd.crosstab(enhanced_df['sentiment_category'], enhanced_df['intent_category'])
-        
-        # Create heatmap
-        fig = px.imshow(heat_data, 
-                       text_auto=True,
-                       color_continuous_scale='Viridis',
-                       title="Sentiment vs Purchase Intent")
-        fig.update_layout(xaxis_title="Purchase Intent", yaxis_title="Sentiment")
-        st.plotly_chart(fig, use_container_width=True)
-    
-    # Add interaction analysis
-    st.subheader("Sentiment and Intent Correlation")
-    
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        # Show correlation between intent and sentiment
-        if 'adjusted_purchase_intent' in enhanced_df.columns:
-            intent_plot_column = 'adjusted_purchase_intent'
-            title_suffix = " (Adjusted by Sentiment Density)"
-        else:
-            intent_plot_column = 'purchase_intent'
-            title_suffix = ""
-            
-        fig = px.scatter(enhanced_df, 
-                       x='sentiment_value', y=intent_plot_column,
-                       color='market_trend_score',
-                       color_continuous_scale='RdYlGn',
-                       title=f"Sentiment vs Purchase Intent{title_suffix}")
-        fig.update_layout(xaxis_title="Sentiment Value", 
-                        yaxis_title="Purchase Intent Score",
-                        height=400)
-        st.plotly_chart(fig, use_container_width=True)
-    
-    with col2:
-        # Display viral potential indicators if available
-        if 'viral_potential' in trend_summary:
-            # Create viral potential gauge
-            fig = go.Figure(go.Indicator(
-                mode = "gauge+number",
-                value = trend_summary['viral_potential'],
-                title = {'text': "Viral Potential Score"},
-                gauge = {
-                    'axis': {'range': [0, 100]},
-                    'bar': {'color': "#9C27B0"},
-                    'steps': [
-                        {'range': [0, 30], 'color': "#E0E0E0"},
-                        {'range': [30, 70], 'color': "#BA68C8"},
-                        {'range': [70, 100], 'color': "#7B1FA2"}
-                    ],
-                    'threshold': {
-                        'line': {'color': "red", 'width': 2},
-                        'thickness': 0.75,
-                        'value': 70
-                    }
-                }
-            ))
-            fig.update_layout(height=400)
-            st.plotly_chart(fig, use_container_width=True)
-            
-            # Add explanation
-            if trend_summary['viral_potential'] > 70:
-                st.info("⭐ High viral potential detected! This product shows strong indicators for viral spread in social media.")
-            elif trend_summary['viral_potential'] > 50:
-                st.info("✅ Moderate viral potential. With targeted marketing, this product could gain momentum.")
-    
-    # Display market trend visualization 
+    # Plot market prediction visualization
     st.subheader("Market Trend Visualization")
     market_fig = plot_market_prediction(enhanced_df, trend_summary)
     st.pyplot(market_fig)
-            
-    # Top comments with purchase intent
-    st.subheader("Top Comments with Purchase Intent")
-
-    high_intent = enhanced_df[enhanced_df['purchase_intent'] > 0.4].sort_values('market_trend_score', ascending=False)
-    if not high_intent.empty:
-        for i, (_, row) in enumerate(high_intent.head(5).iterrows()):
-            with st.container():
-                st.write(f"**Comment {i+1}:** {row['Comment']}")
-                st.caption(f"Purchase Intent: {row['purchase_intent']:.2f} | Market Score: {row['market_trend_score']:.1f}")
-                st.divider()
-    else:
-        st.info("No comments with high purchase intent detected.") 
+    
+    # Display sales prediction
+    st.subheader("Sales Prediction")
+    st.write(f"Predicted Sales Volume: {prediction['predicted_volume']:.0f} units")
+    st.write(f"Prediction Range: {prediction['min_prediction']:.0f} to {prediction['max_prediction']:.0f} units")
     
     # Show full report
     with st.expander("View Full Market Trend Report"):
         report = generate_market_trend_report(enhanced_df, product_name, prediction)
         st.markdown(report)
         
-        # Allow download of the report
-        report_bytes = report.encode()
-        st.download_button(
-            label="Download Market Report",
-            data=report_bytes,
-            file_name=f"{product_name.replace(' ', '_')}_market_report.md",
-            mime="text/markdown",
-        )
-    
-    # Allow download of the enhanced data
-    csv = enhanced_df.to_csv(index=False)
+    # Allow download of the report
+    report_bytes = report.encode()
     st.download_button(
-        label="Download Market Analysis Data",
-        data=csv,
-        file_name="market_trend_analysis.csv",
-        mime="text/csv",
+        label="Download Market Report",
+        data=report_bytes,
+        file_name=f"{product_name.replace(' ', '_')}_market_report.md",
+        mime="text/markdown",
     )
+    
+    # Additional market visualizations
+    st.subheader("Purchase Intent Distribution")
+    intent_fig = px.histogram(enhanced_df,  # type: ignore
+                              x='purchase_intent', 
+                            nbins=20, 
+                            title="Distribution of Purchase Intent",
+                            color_discrete_sequence=['#0074D9'])
+    intent_fig.update_layout(xaxis_title="Purchase Intent Score", 
+                            yaxis_title="Number of Comments")
+    st.plotly_chart(intent_fig, use_container_width=True)
