@@ -6,7 +6,7 @@ based on sentiment analysis of social media comments.
 """
 
 import re
-from turtle import st
+import streamlit as st
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -433,7 +433,7 @@ def plot_market_prediction(enhanced_df, trend_summary):
     # Adjust layout
     plt.tight_layout()
     return fig
-
+        
 def predict_purchase_volume(trend_summary, baseline_volume=1000):
     """
     Enhanced model to estimate potential purchase volume based on sentiment, intent and viral potential.
@@ -618,12 +618,12 @@ def add_market_trends_tab(comments_df, key_prefix=""):
     baseline_volume = col1.number_input(
         "Baseline monthly sales volume:", 
         min_value=100, 
-        value=1000, 
+        value=1000,
         key=f"{key_prefix}baseline_volume"
     )
     product_name = col2.text_input(
         "Product name:", 
-        value="TikTok Product", 
+        value="TikTok Product",
         key=f"{key_prefix}product_name"
     )
     
@@ -641,7 +641,7 @@ def add_market_trends_tab(comments_df, key_prefix=""):
     st.subheader("Market Trend Overview")
     col1, col2, col3, col4 = st.columns(4)
     col1.metric("Market Trend Score", f"{trend_summary['overall_score']:.1f}/100", 
-        trend_summary['trend_category'])
+                trend_summary['trend_category'])
     col2.metric("Positive Sentiment", f"{trend_summary['positive_sentiment_ratio']*100:.1f}%")
     col3.metric("Purchase Intent", f"{trend_summary['purchase_intent_ratio']*100:.1f}%")
     col4.metric("Viral Potential", f"{trend_summary.get('viral_potential', 0):.1f}%")
@@ -650,7 +650,7 @@ def add_market_trends_tab(comments_df, key_prefix=""):
     st.subheader("Market Trend Visualization")
     market_fig = plot_market_prediction(enhanced_df, trend_summary)
     st.pyplot(market_fig)
-    
+            
     # Display sales prediction
     st.subheader("Sales Prediction")
     st.write(f"Predicted Sales Volume: {prediction['predicted_volume']:.0f} units")
@@ -661,14 +661,14 @@ def add_market_trends_tab(comments_df, key_prefix=""):
         report = generate_market_trend_report(enhanced_df, product_name, prediction)
         st.markdown(report)
         
-    # Allow download of the report
-    report_bytes = report.encode()
-    st.download_button(
-        label="Download Market Report",
-        data=report_bytes,
-        file_name=f"{product_name.replace(' ', '_')}_market_report.md",
-        mime="text/markdown",
-    )
+        # Allow download of the report
+        report_bytes = report.encode()
+        st.download_button(
+            label="Download Market Report",
+            data=report_bytes,
+            file_name=f"{product_name.replace(' ', '_')}_market_report.md",
+            mime="text/markdown",
+        )
     
     # Additional market visualizations
     st.subheader("Purchase Intent Distribution")

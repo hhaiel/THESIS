@@ -912,6 +912,11 @@ if page == "Upload Data":
                     
                     with col2:
                         st.subheader("Emoji Analysis")
+                        # Check if Emojis column exists, if not create it
+                        if 'Emojis' not in comments_df.columns:
+                            processed_data = comments_df['Comment'].apply(preprocess_text)
+                            comments_df['Emojis'] = processed_data.apply(lambda x: x['emojis'])
+                        
                         all_emojis = ''.join(comments_df['Emojis'].fillna(''))
                         if all_emojis:
                             emoji_counter = Counter(all_emojis)
@@ -1215,11 +1220,14 @@ elif page == "Fetch TikTok Comments":
                         
                         with col2:
                             st.subheader("Emoji Analysis")
+                            # Check if Emojis column exists, if not create it
+                            if 'Emojis' not in comments_df.columns:
+                                processed_data = comments_df['Comment'].apply(preprocess_text)
+                                comments_df['Emojis'] = processed_data.apply(lambda x: x['emojis'])
+                            
                             all_emojis = ''.join(comments_df['Emojis'].fillna(''))
                             if all_emojis:
                                 emoji_counter = Counter(all_emojis)
-                                
-                                # Create and display the emoji chart
                                 emoji_fig = create_emoji_chart(emoji_counter)
                                 st.pyplot(emoji_fig)
                             else:
