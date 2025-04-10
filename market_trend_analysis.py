@@ -272,11 +272,18 @@ def detect_purchase_intent(text_series):
         results.append(intent_score)
     
     return results
+<<<<<<< HEAD
 def calculate_market_trend_score(df):
     """
     Calculate a market trend score that predicts buying behavior.
     EXTREME FIX: Much more aggressive handling of sentiment distributions
     to ensure the score matches the sentiment distribution.
+=======
+
+def calculate_market_trend_score(comments_df):
+    # Create a copy of the dataframe to avoid modifying the original
+    enhanced_df = comments_df.copy()
+>>>>>>> 64b3767f320b6b8003f675b7d58588f9bd18fd9d
     
     Args:
         df (pandas.DataFrame): DataFrame with Enhanced Sentiment column
@@ -392,9 +399,16 @@ def calculate_market_trend_score(df):
     
     return trend_summary, data
 
+<<<<<<< HEAD
 def plot_market_prediction(data, trend_summary, save_path=None):
     """
     Visualize market trend prediction based on sentiment and intent.
+=======
+# Then, update the plot_market_prediction function to also use Combined Sentiment
+def plot_market_prediction(enhanced_df, trend_summary):
+    # Create a figure with two subplots
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 6))
+>>>>>>> 64b3767f320b6b8003f675b7d58588f9bd18fd9d
     
     Args:
         data (pandas.DataFrame): DataFrame with market trend analysis
@@ -511,11 +525,16 @@ def plot_market_prediction(data, trend_summary, save_path=None):
             print(f"Error calculating trend line: {e}")
     
     plt.tight_layout()
+<<<<<<< HEAD
     
     if save_path:
         plt.savefig(save_path)
         
     return plt.gcf()
+=======
+    return fig
+
+>>>>>>> 64b3767f320b6b8003f675b7d58588f9bd18fd9d
 def predict_purchase_volume(trend_summary, baseline_volume=1000):
     """
     Enhanced model to estimate potential purchase volume based on sentiment, intent and viral potential.

@@ -239,7 +239,7 @@ def save_sentiment_correction(comments_df, selected_comment_idx, corrected_senti
     """
     try:
         # Update the dataframe
-        comments_df.loc[selected_comment_idx, 'Enhanced Sentiment'] = f"{corrected_sentiment} (1.00)"
+        comments_df.loc[selected_comment_idx, 'Combined Sentiment'] = f"{corrected_sentiment} (1.00)"
         
         # Get the comment and detect language
         comment = comments_df.loc[selected_comment_idx, 'Comment']
@@ -604,7 +604,7 @@ def create_sentiment_heatmap(df):
     
     # Count agreements for the enhanced sentiment
     for idx, row in sentiment_matrix.iterrows():
-        enhanced = row['Enhanced Sentiment']
+        enhanced = row['Combined Sentiment']
         
         # Count VADER agreements
         vader = row['VADER Sentiment']
@@ -620,7 +620,7 @@ def create_sentiment_heatmap(df):
     
     # Create the heatmap
     fig = px.imshow(agreement_matrix, 
-                    labels=dict(x="Other Methods", y="Enhanced Sentiment", color="Agreement Count"),
+                    labels=dict(x="Other Methods", y="Combined Sentiment", color="Agreement Count"),
                     x=agreement_matrix.columns,
                     y=agreement_matrix.index,
                     color_continuous_scale='Viridis')
@@ -715,7 +715,6 @@ page = st.sidebar.radio("Choose a section", ["Upload Data", "Fetch TikTok Commen
 
 # Add language settings
 language_mode = add_language_settings()
-
 # Page navigation logic
 if page == "Upload Data":
     st.header("Upload Your Data File")
@@ -855,7 +854,7 @@ if page == "Upload Data":
                                             format_func=lambda x: comments_df.loc[x, 'Comment'][:50] + "...")
 
 # Show current sentiment
-                    current_sentiment = comments_df.loc[selected_comment_idx, 'Enhanced Sentiment']
+                    current_sentiment = comments_df.loc[selected_comment_idx, 'Combined Sentiment']
                     st.write(f"Current sentiment: {current_sentiment}")
 
 # Let user choose new sentiment
@@ -887,7 +886,7 @@ if page == "Upload Data":
                     with col1:
                         st.subheader("Sentiment Distribution")
                         # Plot sentiment distribution
-                        sentiment_fig = plot_sentiment_distribution(comments_df, 'Enhanced Sentiment')
+                        sentiment_fig = plot_sentiment_distribution(comments_df, 'Combined Sentiment')
                         st.pyplot(sentiment_fig)
                         
                         # Troll Comment Distribution
@@ -958,9 +957,6 @@ if page == "Upload Data":
                 with tab4:
                     # Statistics
                     st.subheader("Comment Statistics")
-                    
-                    # Basic stats
-
                     
                     # Basic stats
                     stats = {
@@ -1212,7 +1208,7 @@ elif page == "Fetch TikTok Comments":
                         with col1:
                             st.subheader("Sentiment Distribution")
                             # Plot sentiment distribution
-                            sentiment_fig = plot_sentiment_distribution(comments_df, 'Enhanced Sentiment')
+                            sentiment_fig = plot_sentiment_distribution(comments_df, 'Combined Sentiment')
                             st.pyplot(sentiment_fig)
                         
                         with col2:
@@ -1552,7 +1548,7 @@ elif page == "Market Trends":
             # Process sample data
             processed_data = sample_df['Comment'].apply(preprocess_text)
             sample_df['Processed Comment'] = processed_data.apply(lambda x: x['cleaned_text'])
-            sample_df['Enhanced Sentiment'] = sample_df['Comment'].apply(
+            sample_df['Combined Sentiment'] = sample_df['Comment'].apply(
                 lambda text: analyze_sentiment_with_language_preference(text)
             )
             
