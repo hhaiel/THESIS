@@ -831,17 +831,51 @@ if page == "Upload Data":
                 with tab1:
                     # Display data
                     st.subheader("Processed Comments")
-                    # Ensure all required columns exist before displaying
-                    display_columns = ['Comment', 'Processed Comment', 'VADER Sentiment', 'MNB Sentiment', 'Combined Sentiment', 'Is Troll', 'Troll Score', 'Confidence']
-                    available_columns = [col for col in display_columns if col in comments_df.columns]
-                    st.dataframe(comments_df[available_columns])
                     
-                    # Allow download of processed data
-                    csv = comments_df.to_csv(index=False)
+                    # Add sentiment filters
+                    st.write("Select sentiments to display:")
+                    col1, col2, col3 = st.columns(3)
+                    
+                    # Create filter checkboxes - all unchecked by default
+                    show_positive = col1.checkbox("Positive", value=False)
+                    show_neutral = col2.checkbox("Neutral", value=False)
+                    show_negative = col3.checkbox("Negative", value=False)
+                    
+                    # Filter the dataframe based on selected sentiments
+                    filtered_df = comments_df.copy()
+                    
+                    # If no sentiments are selected, show all comments
+                    if not any([show_positive, show_neutral, show_negative]):
+                        filtered_df = comments_df.copy()
+                    else:
+                        sentiment_filters = []
+                        if show_positive:
+                            sentiment_filters.append(filtered_df['Combined Sentiment'].str.contains('Positive'))
+                        if show_neutral:
+                            sentiment_filters.append(filtered_df['Combined Sentiment'].str.contains('Neutral'))
+                        if show_negative:
+                            sentiment_filters.append(filtered_df['Combined Sentiment'].str.contains('Negative'))
+                        
+                        if sentiment_filters:
+                            filtered_df = filtered_df[pd.concat(sentiment_filters, axis=1).any(axis=1)]
+                    
+                    # Add troll filter
+                    show_trolls = st.checkbox("Show only troll comments", value=False)
+                    if show_trolls:
+                        filtered_df = filtered_df[filtered_df['Is Troll'] == True]
+                    
+                    # Display filtered data
+                    st.write(f"Showing {len(filtered_df)} comments")
+                    display_columns = ['Comment', 'Processed Comment', 'VADER Sentiment', 'MNB Sentiment', 'Combined Sentiment', 'Is Troll', 'Troll Score', 'Confidence']
+                    available_columns = [col for col in display_columns if col in filtered_df.columns]
+                    st.dataframe(filtered_df[available_columns])
+                    
+                    # Allow download of filtered data
+                    csv = filtered_df.to_csv(index=False)
                     st.download_button(
-                        label="Download processed data as CSV",
+                        label="Download filtered data as CSV",
                         data=csv,
-                        file_name="processed_tiktok_comments.csv",
+                        file_name="filtered_tiktok_comments.csv",
                         mime="text/csv",
                     )
                     
@@ -1086,14 +1120,40 @@ elif page == "Fetch TikTok Comments":
     
     # Input for TikTok video link
     video_link = st.text_input("Enter TikTok video link:")
-    col1, col2 = st.columns(2)
-    max_comments = col1.number_input("Maximum comments to fetch:", min_value=100, max_value=2000, value=500, 
-                                   help="Minimum 100 comments required for accurate sentiment analysis")
-    analyze_button = col2.button("Fetch and Analyze")
+    
+    # Add comment fetching options
+    st.write("Select comment fetching option:")
+    fetch_option = st.radio(
+        "Choose how many comments to fetch:",
+        ["Default", "Maximum (5000)", "Minimum (100)", "Custom"],
+        horizontal=True
+    )
+    
+    # Handle different fetch options
+    if fetch_option == "Default":
+        max_comments = 500  # Default number of comments
+        st.info("Will fetch default number of comments (500)")
+    elif fetch_option == "Maximum (5000)":
+        max_comments = 5000
+        st.info("Will fetch maximum number of comments (5000)")
+    elif fetch_option == "Minimum (100)":
+        max_comments = 100
+        st.info("Will fetch minimum number of comments (100)")
+    else:  # Custom option
+        max_comments = st.number_input(
+            "Enter number of comments to fetch:",
+            min_value=100,
+            max_value=5000,
+            value=500,
+            step=100,
+            help="Must be between 100 and 5000 comments"
+        )
+    
+    analyze_button = st.button("Fetch and Analyze")
     
     if analyze_button:
         if video_link:
-            with st.spinner("Fetching comments, please wait..."):
+            with st.spinner(f"Fetching {max_comments} comments, please wait..."):
                 comments_df = fetch_tiktok_comments(video_link, max_comments=max_comments)
                 
                 if comments_df is not None and not comments_df.empty:
